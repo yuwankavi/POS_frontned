@@ -1,0 +1,48 @@
+
+export const warehouses = [
+  {
+    pwd_wh_code: "WH1",
+    pwd_wh_name: "Main Warehouse",
+    pwd_status: "A",
+    pwd_start_date: "2023-01-01",
+    pwd_end_date: null,
+    pwd_created_date: "2023-01-01",
+    pwd_created_by: "Admin",
+    pwd_updated_date: "2023-08-15",
+    pwd_updated_by: "Admin",
+  },
+  {
+    pwd_wh_code: "WH2",
+    pwd_wh_name: "Secondary Warehouse",
+    pwd_status: "A",
+    pwd_start_date: "2023-02-15",
+    pwd_end_date: null,
+    pwd_created_date: "2023-02-15",
+    pwd_created_by: "Admin",
+    pwd_updated_date: "2023-07-20",
+    pwd_updated_by: "Admin",
+  },
+  {
+    pwd_wh_code: "WH3",
+    pwd_wh_name: "Distribution Center",
+    pwd_status: "A",
+    pwd_start_date: "2023-03-10",
+    pwd_end_date: null,
+    pwd_created_date: "2023-03-10",
+    pwd_created_by: "Admin",
+    pwd_updated_date: "2023-06-25",
+    pwd_updated_by: "Admin",
+  },
+  {
+    pwd_wh_code: "WH4",
+    pwd_wh_name: "Closed Warehouse",
+    pwd_status: "I",
+    pwd_start_date: "2022-01-01",
+    pwd_end_date: "2023-12-31",
+    pwd_created_date: "2022-01-01",
+    pwd_created_by: "Admin",
+    pwd_updated_date: "2023-12-31",
+    pwd_updated_by: "Admin",
+  },
+];
+
