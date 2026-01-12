@@ -153,6 +153,9 @@ import Daily_sum from "../../Pages/Report/Daily_Summary";
 import Reorder from "../../Pages/Report/Reorder-level";
 import ExpLevel from "../../Pages/Report/exp";
 import TotalPur from "../../Pages/Report/Total_Purchasing";
+import CashierReport from "../../Pages/Report/Cashier";
+import ItemsReport from "../../Pages/Report/Items";
+import CategoriesReport from "../../Pages/Report/Categories";
 import Batches from "../../Pages/inventory/Product/ProductBatches";
 import Brand from "../../Pages/inventory/Product/ProductBrand";
 import Bincard from "../../Pages/inventory/Bincard";
@@ -240,6 +243,9 @@ const Layout = () => {
           {activePage.endsWith("BARCODE") && <Barcode />}
           {/* Report pages */}
           {activePage.endsWith("EXP_LEVEL") && <ExpLevel />}
+          {activePage.endsWith("CASHIER") && <CashierReport />}
+          {activePage.endsWith("ITEM") && <ItemsReport />}
+          {activePage.endsWith("CATEGORY") && <CategoriesReport />}
           {activePage.endsWith("REORDER_LEVEL") && <Reorder />}
           {activePage.endsWith("DAILY_SUMMARY") && <Daily_sum />}
           {activePage.endsWith("TOTAL_PURCHASING") && <TotalPur />}
