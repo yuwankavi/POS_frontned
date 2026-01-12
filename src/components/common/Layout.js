@@ -226,7 +226,7 @@ const Layout = () => {
           {activePage === "SETTINGS" && <Settings />}
           {activePage === "HELP" && <Help />}
           {/* Inventory pages */}
-          {activePage.endsWith("CATEGORY") && <Category />}
+          {activePage === "INVENTORY_CATEGORY" && <Category />}
           {activePage.endsWith("DASHBOARD") && <Dashboard />}
           {activePage.endsWith("PRODUCT_DETAILS") && <Product />}
           {activePage.endsWith("WAREHOUSE") && <WareHouse />}
@@ -243,9 +243,9 @@ const Layout = () => {
           {activePage.endsWith("BARCODE") && <Barcode />}
           {/* Report pages */}
           {activePage.endsWith("EXP_LEVEL") && <ExpLevel />}
-          {activePage.endsWith("CASHIER") && <CashierReport />}
-          {activePage.endsWith("ITEM") && <ItemsReport />}
-          {activePage.endsWith("CATEGORY") && <CategoriesReport />}
+          {activePage === "REPORTS_CASHIER" && <CashierReport />}
+          {activePage === "REPORTS_ITEM" && <ItemsReport />}
+          {activePage === "REPORTS_CATEGORY" && <CategoriesReport />}
           {activePage.endsWith("REORDER_LEVEL") && <Reorder />}
           {activePage.endsWith("DAILY_SUMMARY") && <Daily_sum />}
           {activePage.endsWith("TOTAL_PURCHASING") && <TotalPur />}
