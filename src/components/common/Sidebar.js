@@ -188,10 +188,14 @@ const Sidebar = ({ setActivePage }) => {
       color: 'bg-purple-500 hover:bg-purple-600',
       hasDropdown: true,
       subItems: [
-        { id: 'EXP_LEVEL', label: 'Near_Expiry', type: 'page', icon: 'fas fa-calendar-times' },
-        { id: 'REORDER_LEVEL', label: 'Re-order Level', type: 'page', icon: 'fas fa-chart-line' },
+
+        //{ id: 'EXP_LEVEL', label: 'Near_Expiry', type: 'page', icon: 'fas fa-calendar-times' },
+       // { id: 'REORDER_LEVEL', label: 'Re-order Level', type: 'page', icon: 'fas fa-chart-line' },
+        { id: 'CASHIER', label: 'Cashier', type: 'page', icon: 'fas fa-cash-register' },
+         { id: 'ITEM', label: 'Items', type: 'page', icon: 'fas fa-box-open' },
+          { id: 'CATEGORY', label: 'Categories', type: 'page', icon: 'fas fa-tags' },
         { id: 'DAILY_SUMMARY', label: 'Daily Summary', type: 'page', icon: 'fas fa-calendar-day' },
-        { id: 'TOTAL_PURCHASING', label: 'Total Purchasing', type: 'page', icon: 'fas fa-shopping-basket' }
+       // { id: 'TOTAL_PURCHASING', label: 'Total Purchasing', type: 'page', icon: 'fas fa-shopping-basket' }
       ]
     },
     
