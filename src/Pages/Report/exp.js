@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import batchService from '../../services/Inventory/batchService';
 
 const Exp = () => {
   const [expiryData, setExpiryData] = useState([]);
@@ -8,93 +9,63 @@ const Exp = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { darkMode } = useSelector(state => state.ui);
 
-  // Mock data for liquor products
-  const mockLiquorData = [
-    {
-      id: 1,
-      productName: "Johnnie Walker Black Label",
-      category: "WHISKY",
-      batchNo: "BW23001",
-      quantity: 24,
-      costPrice: 1850,
-      sellingPrice: 2200,
-      expiryDate: "2024-12-15",
-      daysUntilExpiry: 45,
-      status: "EXPIRING_SOON",
-      supplier: "Premium Spirits Ltd"
-    },
-    {
-      id: 2,
-      productName: "Smirnoff Red Vodka",
-      category: "VODKA",
-      batchNo: "VK23045",
-      quantity: 36,
-      costPrice: 850,
-      sellingPrice: 1100,
-      expiryDate: "2025-06-20",
-      daysUntilExpiry: 213,
-      status: "GOOD",
-      supplier: "Vodka Imports"
-    },
-    {
-      id: 3,
-      productName: "Bacardi White Rum",
-      category: "RUM",
-      batchNo: "RM23012",
-      quantity: 18,
-      costPrice: 720,
-      sellingPrice: 950,
-      expiryDate: "2023-11-30",
-      daysUntilExpiry: -15,
-      status: "EXPIRED",
-      supplier: "Caribbean Spirits"
-    },
-    {
-      id: 4,
-      productName: "Jack Daniels Tennessee",
-      category: "WHISKY",
-      batchNo: "BW23078",
-      quantity: 12,
-      costPrice: 2100,
-      sellingPrice: 2600,
-      expiryDate: "2024-01-10",
-      daysUntilExpiry: 11,
-      status: "EXPIRING_SOON",
-      supplier: "American Whisky Co"
-    },
-    {
-      id: 5,
-      productName: "Absolut Vodka",
-      category: "VODKA",
-      batchNo: "VK23122",
-      quantity: 30,
-      costPrice: 1200,
-      sellingPrice: 1550,
-      expiryDate: "2026-03-15",
-      daysUntilExpiry: 647,
-      status: "GOOD",
-      supplier: "Swedish Imports"
-    },
-    {
-      id: 6,
-      productName: "Captain Morgan Spiced Rum",
-      category: "RUM",
-      batchNo: "RM23089",
-      quantity: 20,
-      costPrice: 680,
-      sellingPrice: 890,
-      expiryDate: "2023-10-25",
-      daysUntilExpiry: -40,
-      status: "EXPIRED",
-      supplier: "Caribbean Spirits"
-    }
-  ];
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [categories, setCategories] = useState(["ALL"]);
 
-  const categories = ["ALL", "WHISKY", "VODKA", "RUM", "GIN", "BEER", "WINE", "BRANDY"];
+  const detectCategory = (desc) => {
+    if (!desc) return 'OTHER';
+    const text = desc.toUpperCase();
+    const known = ['WHISKY','VODKA','RUM','GIN','BEER','WINE','BRANDY','ARRACK'];
+    for (const k of known) if (text.includes(k)) return k;
+    return 'OTHER';
+  };
 
   useEffect(() => {
-    // Simulate API call
-    setExpiryData(mockLiquorData);
+    const loadBatches = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await batchService.getAll();
+        const items = (res && res.ResultSet) ? res.ResultSet : [];
+        const mapped = items.map((it, idx) => {
+          const expiryRaw = it.PB_EXDate || it.PB_EXDate || '';
+          const expiryDate = expiryRaw ? new Date(expiryRaw) : null;
+          const today = new Date();
+          const daysUntilExpiry = expiryDate ? Math.ceil((expiryDate - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / (1000*60*60*24)) : 0;
+          let status = 'GOOD';
+          if (daysUntilExpiry < 0) status = 'EXPIRED';
+          else if (daysUntilExpiry <= 30) status = 'EXPIRING_SOON';
+
+          const costPrice = parseFloat(it.PB_PPrice || 0);
+          const quantity = parseFloat(it.PB_BLQty || 0);
+
+          return {
+            id: `${it.PB_BId || idx}_${it.PB_ProCode || idx}`,
+            productName: it.PB_ProDes || it.PB_ProCode || 'Unknown',
+            category: detectCategory(it.PB_ProDes),
+            batchNo: it.PB_BId || '',
+            quantity: quantity,
+            costPrice: costPrice,
+            sellingPrice: parseFloat(it.PB_SPrice || (costPrice * 1.3)),
+            expiryDate: expiryDate ? expiryDate.toISOString().slice(0,10) : '',
+            daysUntilExpiry,
+            status,
+            supplier: it.PB_SupName || it.PB_SupCode || ''
+          };
+        });
+
+        setExpiryData(mapped);
+        const cats = Array.from(new Set(['ALL', ...mapped.map(m => m.category)]) );
+        setCategories(cats);
+      } catch (err) {
+        setError(err.message || 'Failed to load batches');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBatches();
   }, []);
 
   const filteredData = expiryData.filter(item => {
@@ -148,6 +119,19 @@ const Exp = () => {
 
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full overflow-auto">
+      {loading && (
+        <div className="flex items-center justify-center p-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading batches...</p>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="p-4 mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700">
+          {error}
+        </div>
+      )}
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
         <div>
@@ -302,9 +286,9 @@ const Exp = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Expiry Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actions
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -344,19 +328,7 @@ const Exp = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex gap-2">
-                        <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                          <i className="fas fa-trash"></i>
-                        </button>
-                        <button className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
-                          <i className="fas fa-bullhorn"></i>
-                        </button>
-                      </div>
-                    </td>
+                    
                   </tr>
                 );
               })}

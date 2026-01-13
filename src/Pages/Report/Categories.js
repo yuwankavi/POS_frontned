@@ -224,19 +224,19 @@ const CategoriesReport = () => {
       </div>
 
       {/* Date Controls */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+      {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Select Date
-              </label>
+                Select Date :
+              
               <input
                 type="date"
                 value={reportDate}
                 onChange={handleDateChange}
                 className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              /></label>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -258,7 +258,53 @@ const CategoriesReport = () => {
                 Print
               </button>
             </div>
-          </div>
+          </div> */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+    {/* Left Section */}
+    <div className="flex flex-wrap items-center gap-4">
+
+      {/* Date */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Select Date:
+        </span>
+        <input
+          type="date"
+          value={reportDate}
+          onChange={handleDateChange}
+          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
+          bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm 
+          focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleRefresh}
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 
+          text-white rounded-lg hover:from-blue-700 hover:to-blue-800 
+          transition-all duration-200 flex items-center gap-2 shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh Report
+        </button>
+
+        <button
+          onClick={() => window.print()}
+          className="px-4 py-2 border border-gray-300 dark:border-gray-600 
+          text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 
+          dark:hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          🖨 Print
+        </button>
+      </div>
+    </div>
           
           <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 px-3 py-2 rounded-lg">
             <span className="font-medium">Selected:</span> {new Date(reportDate).toLocaleDateString('en-US', { 
@@ -327,9 +373,9 @@ const CategoriesReport = () => {
               </svg>
             </div>
           </div>
-          <div className="text-xs opacity-90 mt-2">
+          {/* <div className="text-xs opacity-90 mt-2">
             Avg Margin: {summary.avgProfitMargin.toFixed(1)}%
-          </div>
+          </div> */}
         </div>
       </div>
 
