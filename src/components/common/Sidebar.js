@@ -172,6 +172,7 @@ const Sidebar = ({ setActivePage }) => {
             // { id: 'SALES_RETURN', label: 'Sales Return (MRN)', type: 'page', icon: 'fas fa-undo-alt' },
             // { id: 'SALES_RETURN', label: 'Sales Return (MRN)', type: 'page', icon: 'fas fa-undo-alt' },
             { id: 'STOCK_ADJUSTMENT', label: 'Stock Adjustment (ADJ)', type: 'page', icon: 'fas fa-sliders-h' },
+            { id: 'REORDER_ALERTS', label: 'Reorder Alerts {ROA)', type: 'page', icon: 'fas fa-exclamation-triangle' },
             
              
           ]

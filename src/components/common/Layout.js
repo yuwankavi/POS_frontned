@@ -149,6 +149,7 @@ import PRN from "../../Pages/inventory/Store_Transaction/PRNS";
 import MRN from "../../Pages/inventory/Store_Transaction/MRN";
 import StockAjustment from "../../Pages/inventory/Store_Transaction/StockAdjustment";
 import Writoff from "../../Pages/inventory/Store_Transaction/Writoff";
+import ROA from "../../Pages/inventory/Store_Transaction/ROA";
 import Daily_sum from "../../Pages/Report/Daily_Summary";
 import Reorder from "../../Pages/Report/Reorder-level";
 import ExpLevel from "../../Pages/Report/exp";
@@ -236,6 +237,7 @@ const Layout = () => {
           {activePage.endsWith("PURCHASE_ITEM") && <GRN />}
           {activePage.endsWith("SALES_INVOICE") && <MRQ />}
           {activePage.endsWith("PURCHASE_RETURN") && <PRN />}
+          {activePage.endsWith("REORDER_ALERTS") && <ROA />}
           {activePage.endsWith("SALES_RETURN") && <MRN />}
           {activePage.endsWith("STOCK_ADJUSTMENT") && <StockAjustment />}
           {activePage.endsWith("WRITE_OFF") && <Writoff />}

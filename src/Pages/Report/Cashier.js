@@ -1077,7 +1077,7 @@ const CashierReport = () => {
                       </div>
                     </div>
 
-                    <button
+                    {/* <button
                       onClick={() => {
                         // View details functionality
                         console.log('View details for', c.cashier);
@@ -1085,7 +1085,7 @@ const CashierReport = () => {
                       className="mt-4 w-full py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                     >
                       View Details
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               ))}
