@@ -7,6 +7,7 @@ import {
   FiAlertTriangle,
   FiHome
 } from 'react-icons/fi';
+import Breadcrumb from '../../../components/common/Breadcrumb.js';
 
 const ROA = () => {
   const { darkMode } = useSelector((state) => state.ui || {});
@@ -50,6 +51,7 @@ const ROA = () => {
 
   return (
     <div className={`flex flex-col p-1 md:p-1 rounded-xl shadow-md h-full ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
+      <Breadcrumb current="Inventory / Store Transaction / Reorder Alerts (ROA) " />
       <div className="mt-2 mb-3 md:mb-5">
         <div className="flex items-center justify-between mb-1 md:mb-2">
           <div className="flex items-center gap-2">
@@ -152,7 +154,7 @@ const ROA = () => {
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {filtered.map((it, idx) => {
+                    {lowStock.map((it, idx) => {
                       const qty = parseFloat(it.PB_BLQty || 0);
                       const isLow = !Number.isNaN(qty) && qty <= 10;
                       return (
@@ -176,7 +178,7 @@ const ROA = () => {
                 </table>
               </div>
 
-              {filtered.length === 0 && (
+              {lowStock.length === 0 && (
                 <div className="text-center py-8">
                   <FiPackage className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm font-medium text-gray-600">No items found</p>
@@ -184,7 +186,7 @@ const ROA = () => {
               )}
 
               {/* Low stock summary */}
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <h4 className="text-sm font-semibold">Low stock items (&lt;= 10)</h4>
                 <div className="mt-2 space-y-2">
                   {lowStock.length === 0 ? (
@@ -205,8 +207,8 @@ const ROA = () => {
                       </div>
                     ))
                   )}
-                </div>
-              </div>
+                </div> */}
+              {/* </div> */}
             </div>
           )}
         </div>
