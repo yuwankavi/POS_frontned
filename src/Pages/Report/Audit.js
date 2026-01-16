@@ -441,7 +441,389 @@ const Audit = () => {
   });
 
   const handleGenerateReport = () => {
-    showAlertMessage("Audit report generated successfully", "success");
+    try {
+      // Generate comprehensive audit report PDF
+      const reportDate = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      const reportTime = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      // Get session statistics
+      const activeSessionsList = filteredData.filter(log => !log.User_LogOutTime);
+      const closedSessionsList = filteredData.filter(log => log.User_LogOutTime);
+      
+      // Get user activity breakdown
+      const userActivityMap = {};
+      filteredData.forEach(log => {
+        const userName = log.User_Name || 'Unknown';
+        if (!userActivityMap[userName]) {
+          userActivityMap[userName] = { logins: 0, activeSessions: 0 };
+        }
+        userActivityMap[userName].logins += 1;
+        if (!log.User_LogOutTime) {
+          userActivityMap[userName].activeSessions += 1;
+        }
+      });
+
+      // Get device statistics
+      const deviceMap = {};
+      filteredData.forEach(log => {
+        const device = log.User_LoggedDev || 'Unknown';
+        deviceMap[device] = (deviceMap[device] || 0) + 1;
+      });
+
+      // Get IP statistics
+      const ipMap = {};
+      filteredData.forEach(log => {
+        const ip = log.User_LoggedIP || 'Unknown';
+        ipMap[ip] = (ipMap[ip] || 0) + 1;
+      });
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>User Audit & Security Report</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              background: #f5f5f5;
+              color: #333;
+              line-height: 1.6;
+            }
+            .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+            
+            /* Header */
+            .header { 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 12px;
+              margin-bottom: 20px;
+              text-align: center;
+            }
+            .header h1 { font-size: 28px; margin-bottom: 5px; }
+            .header .subtitle { opacity: 0.9; font-size: 14px; }
+            .header .report-meta { 
+              margin-top: 15px; 
+              display: flex; 
+              justify-content: center; 
+              gap: 30px;
+              font-size: 13px;
+            }
+            .header .report-meta span { 
+              background: rgba(255,255,255,0.2); 
+              padding: 5px 15px; 
+              border-radius: 20px; 
+            }
+            
+            /* Summary Cards */
+            .summary-grid { 
+              display: grid; 
+              grid-template-columns: repeat(4, 1fr); 
+              gap: 15px; 
+              margin-bottom: 20px; 
+            }
+            .summary-card { 
+              background: white; 
+              padding: 20px; 
+              border-radius: 10px; 
+              box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+              text-align: center;
+            }
+            .summary-card.blue { border-left: 4px solid #3b82f6; }
+            .summary-card.green { border-left: 4px solid #22c55e; }
+            .summary-card.red { border-left: 4px solid #ef4444; }
+            .summary-card.purple { border-left: 4px solid #a855f7; }
+            .summary-card .value { font-size: 32px; font-weight: bold; color: #1f2937; }
+            .summary-card .label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+            
+            /* Section */
+            .section { 
+              background: white; 
+              border-radius: 10px; 
+              padding: 20px; 
+              margin-bottom: 20px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+            .section-title { 
+              font-size: 16px; 
+              font-weight: 600; 
+              color: #374151;
+              margin-bottom: 15px;
+              padding-bottom: 10px;
+              border-bottom: 2px solid #e5e7eb;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .section-title::before {
+              content: '';
+              width: 4px;
+              height: 20px;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              border-radius: 2px;
+            }
+            
+            /* Table */
+            table { width: 100%; border-collapse: collapse; font-size: 13px; }
+            th { 
+              background: #f9fafb; 
+              padding: 12px 10px; 
+              text-align: left; 
+              font-weight: 600;
+              color: #374151;
+              border-bottom: 2px solid #e5e7eb;
+            }
+            td { 
+              padding: 10px; 
+              border-bottom: 1px solid #f3f4f6;
+              color: #4b5563;
+            }
+            tr:hover { background: #f9fafb; }
+            
+            /* Status Badges */
+            .badge { 
+              display: inline-block; 
+              padding: 4px 10px; 
+              border-radius: 20px; 
+              font-size: 11px; 
+              font-weight: 600;
+            }
+            .badge-active { background: #dcfce7; color: #166534; }
+            .badge-closed { background: #f3f4f6; color: #4b5563; }
+            .badge-suspicious { background: #fef2f2; color: #dc2626; }
+            
+            /* Stats Grid */
+            .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+            .stat-item { 
+              background: #f9fafb; 
+              padding: 15px; 
+              border-radius: 8px;
+              text-align: center;
+            }
+            .stat-item .stat-value { font-size: 24px; font-weight: bold; color: #1f2937; }
+            .stat-item .stat-label { font-size: 11px; color: #6b7280; }
+            
+            /* Footer */
+            .footer { 
+              text-align: center; 
+              padding: 20px; 
+              color: #9ca3af;
+              font-size: 12px;
+              border-top: 1px solid #e5e7eb;
+              margin-top: 20px;
+            }
+            .footer .company { font-weight: 600; color: #6b7280; }
+            
+            /* Print Styles */
+            @media print {
+              body { background: white; }
+              .container { padding: 0; }
+              .section, .summary-card { box-shadow: none; border: 1px solid #e5e7eb; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <!-- Header -->
+            <div class="header">
+              <h1>🛡️ User Audit & Security Report</h1>
+              <p class="subtitle">Comprehensive Session & Activity Analysis</p>
+              <div class="report-meta">
+                <span>📅 ${reportDate}</span>
+                <span>🕐 ${reportTime}</span>
+                <span>📊 ${filteredData.length} Records</span>
+              </div>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+              <div class="summary-card blue">
+                <div class="value">${summary.totalLoginsToday}</div>
+                <div class="label">Today's Logins</div>
+              </div>
+              <div class="summary-card green">
+                <div class="value">${summary.activeSessions}</div>
+                <div class="label">Active Sessions</div>
+              </div>
+              <div class="summary-card red">
+                <div class="value">${summary.suspiciousLogins}</div>
+                <div class="label">Suspicious Logins</div>
+              </div>
+              <div class="summary-card purple">
+                <div class="value">${summary.uniqueUsers}</div>
+                <div class="label">Unique Users</div>
+              </div>
+            </div>
+            
+            <!-- User Activity Breakdown -->
+            <div class="section">
+              <h3 class="section-title">User Activity Breakdown</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User Name</th>
+                    <th>Total Logins</th>
+                    <th>Active Sessions</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${Object.entries(userActivityMap).map(([user, data]) => `
+                    <tr>
+                      <td><strong>${user}</strong></td>
+                      <td>${data.logins}</td>
+                      <td>${data.activeSessions}</td>
+                      <td>
+                        ${data.activeSessions > 0 
+                          ? '<span class="badge badge-active">● Online</span>' 
+                          : '<span class="badge badge-closed">○ Offline</span>'}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Device & Network Analysis -->
+            <div class="section">
+              <h3 class="section-title">Device & Network Analysis</h3>
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-value">${Object.keys(deviceMap).length}</div>
+                  <div class="stat-label">Unique Devices</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">${Object.keys(ipMap).length}</div>
+                  <div class="stat-label">Unique IPs</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">${summary.mostActiveUser}</div>
+                  <div class="stat-label">Most Active User</div>
+                </div>
+              </div>
+              <table style="margin-top: 15px;">
+                <thead>
+                  <tr>
+                    <th>Device</th>
+                    <th>Sessions</th>
+                    <th>IP Addresses</th>
+                    <th>Connections</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${Object.entries(deviceMap).slice(0, 10).map(([device, count]) => `
+                    <tr>
+                      <td>💻 ${device}</td>
+                      <td>${count}</td>
+                      <td>${Object.entries(ipMap).slice(0, 1).map(([ip]) => ip).join(', ')}</td>
+                      <td>${count}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Recent Session Activity -->
+            <div class="section">
+              <h3 class="section-title">Session Audit Trail (Latest ${Math.min(filteredData.length, 20)} Records)</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Login Time</th>
+                    <th>Logout Time</th>
+                    <th>Duration</th>
+                    <th>Device</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${filteredData.slice(0, 20).map(log => `
+                    <tr>
+                      <td><strong>${log.User_Name || 'N/A'}</strong><br><small style="color:#9ca3af;">ID: ${log.User_ID || 'N/A'}</small></td>
+                      <td>${log.User_LogTime ? new Date(log.User_LogTime).toLocaleString() : 'N/A'}</td>
+                      <td>${log.User_LogOutTime ? new Date(log.User_LogOutTime).toLocaleString() : '<span style="color:#22c55e;">Active Now</span>'}</td>
+                      <td>${formatDuration(log.User_LogTime, log.User_LogOutTime)}</td>
+                      <td>💻 ${log.User_LoggedDev || 'Unknown'}</td>
+                      <td>🌐 ${log.User_LoggedIP || 'N/A'}</td>
+                      <td>
+                        ${!log.User_LogOutTime 
+                          ? '<span class="badge badge-active">● Active</span>' 
+                          : '<span class="badge badge-closed">○ Closed</span>'}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Active Sessions Summary -->
+            ${activeSessionsList.length > 0 ? `
+            <div class="section">
+              <h3 class="section-title">🟢 Currently Active Sessions (${activeSessionsList.length})</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Login Since</th>
+                    <th>Duration</th>
+                    <th>Device</th>
+                    <th>IP Address</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${activeSessionsList.map(log => `
+                    <tr>
+                      <td><strong>${log.User_Name || 'N/A'}</strong></td>
+                      <td>${log.User_LogTime ? new Date(log.User_LogTime).toLocaleString() : 'N/A'}</td>
+                      <td style="color:#22c55e; font-weight:600;">${formatDuration(log.User_LogTime, null)}</td>
+                      <td>${log.User_LoggedDev || 'Unknown'}</td>
+                      <td>${log.User_LoggedIP || 'N/A'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+            
+            <!-- Footer -->
+            <div class="footer">
+              <p class="company">METRO POS - Security Audit System</p>
+              <p>Generated on ${reportDate} at ${reportTime}</p>
+              <p>This report contains sensitive security information. Handle with care.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create blob and trigger download
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Audit_Security_Report_${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showAlertMessage("Audit report generated and downloaded successfully!", "success");
+    } catch (error) {
+      console.error('Report generation error:', error);
+      showAlertMessage("Failed to generate report", "error");
+    }
   };
 
   const handleExportLogs = () => {
@@ -516,13 +898,7 @@ const Audit = () => {
                 Generate Report
               </button>
 
-              <button
-                onClick={handleExportLogs}
-                className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-sm min-w-[130px] justify-center"
-              >
-                <FiDownload className="w-4 h-4" />
-                Export Logs
-              </button>
+             
             </div>
           </div>
         </div>
