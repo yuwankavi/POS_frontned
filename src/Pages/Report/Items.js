@@ -1448,10 +1448,10 @@ const ItemsReport = () => {
 
             {/* Date Filter */}
             <div className="flex gap-2">
-              <button className="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-700 dark:to-indigo-700 text-white px-3 py-2 rounded-lg text-sm min-w-[130px] justify-center">
+              {/* <button className="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-700 dark:to-indigo-700 text-white px-3 py-2 rounded-lg text-sm min-w-[130px] justify-center">
                 <FiCalendar className="w-4 h-4" />
                 Select Date
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
