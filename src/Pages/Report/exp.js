@@ -741,6 +741,7 @@ import {
 import Breadcrumb from "../../components/common/Breadcrumb.js";
 
 const Exp = () => {
+  const { darkMode } = useSelector(state => state.ui || {});
   const [expiryData, setExpiryData] = useState([]);
   const [filter, setFilter] = useState('ALL'); // ALL, EXPIRING_SOON, EXPIRED, GOOD
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -752,6 +753,7 @@ const Exp = () => {
   const [alertType, setAlertType] = useState("success");
   const [showAlert, setShowAlert] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
 
   const detectCategory = (desc) => {
     if (!desc) return 'OTHER';
@@ -936,11 +938,440 @@ const Exp = () => {
   };
 
   const handleGenerateReport = () => {
-    showAlertMessage("Expiry report generated successfully", "success");
+    try {
+      const reportDate = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      const reportTime = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      // Get categorized data
+      const expiredProducts = expiryData.filter(item => item.status === 'EXPIRED');
+      const expiringSoonProducts = expiryData.filter(item => item.status === 'EXPIRING_SOON');
+      const goodProducts = expiryData.filter(item => item.status === 'GOOD');
+
+      // Group by category
+      const categoryBreakdown = {};
+      expiryData.forEach(item => {
+        if (!categoryBreakdown[item.category]) {
+          categoryBreakdown[item.category] = { expired: 0, expiringSoon: 0, good: 0, totalValue: 0 };
+        }
+        if (item.status === 'EXPIRED') categoryBreakdown[item.category].expired++;
+        else if (item.status === 'EXPIRING_SOON') categoryBreakdown[item.category].expiringSoon++;
+        else categoryBreakdown[item.category].good++;
+        categoryBreakdown[item.category].totalValue += item.totalCost || 0;
+      });
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Expiry Monitoring Report</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              background: #f8fafc;
+              color: #1e293b;
+              line-height: 1.6;
+            }
+            .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+            
+            /* Header */
+            .header { 
+              background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 16px;
+              margin-bottom: 24px;
+              text-align: center;
+              box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+            }
+            .header h1 { font-size: 32px; margin-bottom: 8px; font-weight: 700; }
+            .header .subtitle { opacity: 0.9; font-size: 14px; }
+            .header .report-meta { 
+              margin-top: 20px; 
+              display: flex; 
+              justify-content: center; 
+              gap: 20px;
+              flex-wrap: wrap;
+              font-size: 13px;
+            }
+            .header .report-meta span { 
+              background: rgba(255,255,255,0.2); 
+              padding: 8px 16px; 
+              border-radius: 25px;
+              backdrop-filter: blur(10px);
+            }
+            
+            /* Summary Cards */
+            .summary-grid { 
+              display: grid; 
+              grid-template-columns: repeat(4, 1fr); 
+              gap: 16px; 
+              margin-bottom: 24px; 
+            }
+            .summary-card { 
+              background: white; 
+              padding: 20px; 
+              border-radius: 12px; 
+              box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+              text-align: center;
+              border-top: 4px solid;
+            }
+            .summary-card.yellow { border-top-color: #f59e0b; background: linear-gradient(to bottom, #fffbeb, white); }
+            .summary-card.red { border-top-color: #ef4444; background: linear-gradient(to bottom, #fef2f2, white); }
+            .summary-card.green { border-top-color: #22c55e; background: linear-gradient(to bottom, #f0fdf4, white); }
+            .summary-card.purple { border-top-color: #a855f7; background: linear-gradient(to bottom, #faf5ff, white); }
+            .summary-card .icon { font-size: 28px; margin-bottom: 8px; }
+            .summary-card .value { font-size: 36px; font-weight: 800; }
+            .summary-card.yellow .value { color: #d97706; }
+            .summary-card.red .value { color: #dc2626; }
+            .summary-card.green .value { color: #16a34a; }
+            .summary-card.purple .value { color: #9333ea; }
+            .summary-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+            
+            /* Section */
+            .section { 
+              background: white; 
+              border-radius: 12px; 
+              padding: 24px; 
+              margin-bottom: 20px;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            }
+            .section-title { 
+              font-size: 18px; 
+              font-weight: 700; 
+              color: #1e293b;
+              margin-bottom: 16px;
+              padding-bottom: 12px;
+              border-bottom: 2px solid #e2e8f0;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            }
+            .section-title .icon { font-size: 20px; }
+            
+            /* Alert Section */
+            .alert-section { 
+              border-left: 4px solid;
+              padding-left: 16px;
+              margin-bottom: 20px;
+            }
+            .alert-section.danger { border-left-color: #ef4444; background: #fef2f2; padding: 16px; border-radius: 0 8px 8px 0; }
+            .alert-section.warning { border-left-color: #f59e0b; background: #fffbeb; padding: 16px; border-radius: 0 8px 8px 0; }
+            .alert-section h4 { font-weight: 600; margin-bottom: 8px; }
+            .alert-section.danger h4 { color: #dc2626; }
+            .alert-section.warning h4 { color: #d97706; }
+            
+            /* Table */
+            table { width: 100%; border-collapse: collapse; font-size: 13px; }
+            th { 
+              background: linear-gradient(to right, #f8fafc, #f1f5f9); 
+              padding: 14px 12px; 
+              text-align: left; 
+              font-weight: 600;
+              color: #475569;
+              border-bottom: 2px solid #e2e8f0;
+              text-transform: uppercase;
+              font-size: 11px;
+              letter-spacing: 0.5px;
+            }
+            td { 
+              padding: 12px; 
+              border-bottom: 1px solid #f1f5f9;
+              color: #334155;
+            }
+            tr:hover { background: #f8fafc; }
+            
+            /* Status Badges */
+            .badge { 
+              display: inline-block; 
+              padding: 6px 12px; 
+              border-radius: 20px; 
+              font-size: 11px; 
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+            .badge-expired { background: #fecaca; color: #dc2626; }
+            .badge-warning { background: #fef3c7; color: #d97706; }
+            .badge-good { background: #dcfce7; color: #16a34a; }
+            
+            /* Progress Bar */
+            .health-bar { 
+              width: 100%; 
+              height: 24px; 
+              background: #e2e8f0; 
+              border-radius: 12px; 
+              overflow: hidden;
+              display: flex;
+            }
+            .health-bar .segment { height: 100%; transition: width 0.3s; }
+            .health-bar .good { background: linear-gradient(to right, #22c55e, #16a34a); }
+            .health-bar .warning { background: linear-gradient(to right, #f59e0b, #d97706); }
+            .health-bar .danger { background: linear-gradient(to right, #ef4444, #dc2626); }
+            
+            /* Footer */
+            .footer { 
+              text-align: center; 
+              padding: 24px; 
+              color: #94a3b8;
+              font-size: 12px;
+              border-top: 1px solid #e2e8f0;
+              margin-top: 24px;
+            }
+            .footer .company { font-weight: 600; color: #64748b; font-size: 14px; }
+            
+            /* Print Styles */
+            @media print {
+              body { background: white; }
+              .container { padding: 0; }
+              .section, .summary-card { box-shadow: none; border: 1px solid #e2e8f0; }
+              .header { box-shadow: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <!-- Header -->
+            <div class="header">
+              <h1>📦 Expiry Monitoring Report</h1>
+              <p class="subtitle">Comprehensive Product Expiry Analysis & Stock Health Assessment</p>
+              <div class="report-meta">
+                <span>📅 ${reportDate}</span>
+                <span>🕐 ${reportTime}</span>
+                <span>📊 ${expiryData.length} Products Analyzed</span>
+                <span>💰 Risk Value: ${formatCurrency(summaryMetrics.riskValue)}</span>
+              </div>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+              <div class="summary-card yellow">
+                <div class="icon">⚠️</div>
+                <div class="value">${summaryMetrics.expiringSoon}</div>
+                <div class="label">Expiring Soon</div>
+              </div>
+              <div class="summary-card red">
+                <div class="icon">❌</div>
+                <div class="value">${summaryMetrics.expired}</div>
+                <div class="label">Expired</div>
+              </div>
+              <div class="summary-card green">
+                <div class="icon">✅</div>
+                <div class="value">${summaryMetrics.good}</div>
+                <div class="label">Good Stock</div>
+              </div>
+              <div class="summary-card purple">
+                <div class="icon">📈</div>
+                <div class="value">${summaryMetrics.healthPercentage.toFixed(1)}%</div>
+                <div class="label">Stock Health</div>
+              </div>
+            </div>
+            
+            <!-- Stock Health Overview -->
+            <div class="section">
+              <h3 class="section-title"><span class="icon">📊</span> Stock Health Overview</h3>
+              <div class="health-bar">
+                <div class="segment good" style="width: ${(summaryMetrics.good / summaryMetrics.totalItems * 100) || 0}%"></div>
+                <div class="segment warning" style="width: ${(summaryMetrics.expiringSoon / summaryMetrics.totalItems * 100) || 0}%"></div>
+                <div class="segment danger" style="width: ${(summaryMetrics.expired / summaryMetrics.totalItems * 100) || 0}%"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: #64748b;">
+                <span>🟢 Good: ${summaryMetrics.good} items (${((summaryMetrics.good / summaryMetrics.totalItems * 100) || 0).toFixed(1)}%)</span>
+                <span>🟡 Expiring: ${summaryMetrics.expiringSoon} items (${((summaryMetrics.expiringSoon / summaryMetrics.totalItems * 100) || 0).toFixed(1)}%)</span>
+                <span>🔴 Expired: ${summaryMetrics.expired} items (${((summaryMetrics.expired / summaryMetrics.totalItems * 100) || 0).toFixed(1)}%)</span>
+              </div>
+            </div>
+
+            ${expiredProducts.length > 0 ? `
+            <!-- Expired Products - Critical Alert -->
+            <div class="section">
+              <div class="alert-section danger">
+                <h4>🚨 CRITICAL: ${expiredProducts.length} Expired Products Require Immediate Action</h4>
+                <p style="font-size: 13px; color: #7f1d1d;">These products have passed their expiry date and should be removed from inventory immediately.</p>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Batch No</th>
+                    <th>Qty</th>
+                    <th>Expiry Date</th>
+                    <th>Days Expired</th>
+                    <th>Risk Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${expiredProducts.slice(0, 15).map(item => `
+                    <tr>
+                      <td><strong>${item.productName}</strong><br><small style="color:#94a3b8;">${item.supplier || 'N/A'}</small></td>
+                      <td><span class="badge badge-expired">${item.category}</span></td>
+                      <td>${item.batchNo || 'N/A'}</td>
+                      <td><strong>${parseInt(item.quantity)}</strong></td>
+                      <td style="color:#dc2626; font-weight:600;">${item.expiryDate || 'N/A'}</td>
+                      <td style="color:#dc2626; font-weight:700;">${Math.abs(item.daysUntilExpiry)} days ago</td>
+                      <td style="color:#dc2626; font-weight:600;">${formatCurrency(item.totalCost)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              ${expiredProducts.length > 15 ? `<p style="text-align:center; margin-top:12px; color:#64748b; font-size:12px;">... and ${expiredProducts.length - 15} more expired products</p>` : ''}
+            </div>
+            ` : ''}
+
+            ${expiringSoonProducts.length > 0 ? `
+            <!-- Expiring Soon Products - Warning -->
+            <div class="section">
+              <div class="alert-section warning">
+                <h4>⚠️ WARNING: ${expiringSoonProducts.length} Products Expiring Within 30 Days</h4>
+                <p style="font-size: 13px; color: #92400e;">These products need attention. Consider promotions or stock rotation.</p>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Batch No</th>
+                    <th>Qty</th>
+                    <th>Expiry Date</th>
+                    <th>Days Left</th>
+                    <th>Value at Risk</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${expiringSoonProducts.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry).slice(0, 15).map(item => `
+                    <tr>
+                      <td><strong>${item.productName}</strong><br><small style="color:#94a3b8;">${item.supplier || 'N/A'}</small></td>
+                      <td><span class="badge badge-warning">${item.category}</span></td>
+                      <td>${item.batchNo || 'N/A'}</td>
+                      <td><strong>${parseInt(item.quantity)}</strong></td>
+                      <td style="color:#d97706; font-weight:600;">${item.expiryDate || 'N/A'}</td>
+                      <td style="color:#d97706; font-weight:700;">${item.daysUntilExpiry} days</td>
+                      <td style="color:#d97706; font-weight:600;">${formatCurrency(item.totalCost)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              ${expiringSoonProducts.length > 15 ? `<p style="text-align:center; margin-top:12px; color:#64748b; font-size:12px;">... and ${expiringSoonProducts.length - 15} more products expiring soon</p>` : ''}
+            </div>
+            ` : ''}
+            
+            <!-- Category Breakdown -->
+            <div class="section">
+              <h3 class="section-title"><span class="icon">📁</span> Category-wise Analysis</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Expired</th>
+                    <th>Expiring Soon</th>
+                    <th>Good</th>
+                    <th>Total Value</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${Object.entries(categoryBreakdown).map(([category, data]) => `
+                    <tr>
+                      <td><strong>${category}</strong></td>
+                      <td style="color:#dc2626; font-weight:600;">${data.expired}</td>
+                      <td style="color:#d97706; font-weight:600;">${data.expiringSoon}</td>
+                      <td style="color:#16a34a; font-weight:600;">${data.good}</td>
+                      <td>${formatCurrency(data.totalValue)}</td>
+                      <td>
+                        ${data.expired > 0 ? '<span class="badge badge-expired">Needs Action</span>' : 
+                          data.expiringSoon > 0 ? '<span class="badge badge-warning">Monitor</span>' : 
+                          '<span class="badge badge-good">Healthy</span>'}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Good Stock Summary -->
+            <div class="section">
+              <h3 class="section-title"><span class="icon">✅</span> Healthy Stock Summary (${goodProducts.length} Products)</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Batch No</th>
+                    <th>Qty</th>
+                    <th>Expiry Date</th>
+                    <th>Days Remaining</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${goodProducts.slice(0, 10).map(item => `
+                    <tr>
+                      <td><strong>${item.productName}</strong></td>
+                      <td>${item.category}</td>
+                      <td>${item.batchNo || 'N/A'}</td>
+                      <td>${parseInt(item.quantity)}</td>
+                      <td>${item.expiryDate || 'N/A'}</td>
+                      <td style="color:#16a34a; font-weight:600;">${item.daysUntilExpiry} days</td>
+                      <td><span class="badge badge-good">Good</span></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              ${goodProducts.length > 10 ? `<p style="text-align:center; margin-top:12px; color:#64748b; font-size:12px;">... and ${goodProducts.length - 10} more products in good condition</p>` : ''}
+            </div>
+            
+            <!-- Footer -->
+            <div class="footer">
+              <p class="company">METRO POS - Inventory Management System</p>
+              <p>Generated on ${reportDate} at ${reportTime}</p>
+              <p style="margin-top:8px;">📧 For queries, contact inventory@metropos.com | 📞 Support: +94 11 234 5678</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create blob and trigger download, and also open in new tab for viewing
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      // Open in new tab for immediate viewing
+      const newWindow = window.open(url, '_blank');
+      if (newWindow) {
+        newWindow.focus();
+      }
+      
+      // Also trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Expiry_Monitoring_Report_${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up after a delay to allow both operations to complete
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+
+      showAlertMessage("Expiry report generated and downloaded successfully!", "success");
+    } catch (error) {
+      console.error('Report generation error:', error);
+      showAlertMessage("Failed to generate report: " + error.message, "error");
+    }
   };
 
   const handleSendAlerts = () => {
-    showAlertMessage("Alerts sent to concerned staff", "info");
+    setShowAlertsModal(true);
   };
 
   const summaryMetrics = React.useMemo(() => {
@@ -978,6 +1409,224 @@ const Exp = () => {
             >
               <FiX className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Expiry Alerts Modal */}
+      {showAlertsModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[9999] p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <div className={`rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <FiAlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">⚠️ Expiry Alerts Dashboard</h2>
+                    <p className="text-white/80 text-sm">Products requiring immediate attention</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAlertsModal(false)}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <FiX className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {/* Quick Stats in Header */}
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+                  <div className="text-3xl font-bold">{expiryData.filter(item => item.status === 'EXPIRED').length}</div>
+                  <div className="text-white/80 text-xs">Expired Products</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+                  <div className="text-3xl font-bold">{expiryData.filter(item => item.status === 'EXPIRING_SOON').length}</div>
+                  <div className="text-white/80 text-xs">Expiring Soon</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+                  <div className="text-3xl font-bold">{formatCurrency(summaryMetrics.riskValue)}</div>
+                  <div className="text-white/80 text-xs">Total Risk Value</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {/* Expired Products Section */}
+              {expiryData.filter(item => item.status === 'EXPIRED').length > 0 && (
+                <div className="mb-6">
+                  <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl ${darkMode ? 'bg-red-900/30 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+                    <div className="p-2 bg-red-500 rounded-lg">
+                      <FiX className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-red-600 dark:text-red-400">🚨 CRITICAL - Expired Products ({expiryData.filter(item => item.status === 'EXPIRED').length})</h3>
+                      <p className="text-xs text-red-600/70 dark:text-red-400/70">These products must be removed from inventory immediately</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-3">
+                    {expiryData.filter(item => item.status === 'EXPIRED').map((item, index) => (
+                      <div 
+                        key={item.id || index}
+                        className={`flex items-center justify-between p-4 rounded-xl border-l-4 border-red-500 ${darkMode ? 'bg-gray-700/50' : 'bg-red-50/50'} hover:shadow-md transition-shadow`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                            <FiPackage className="w-5 h-5 text-red-600 dark:text-red-400" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.productName}</h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">{item.category}</span>
+                              <span>•</span>
+                              <span>Batch: {item.batchNo || 'N/A'}</span>
+                              <span>•</span>
+                              <span>{item.supplier || 'Unknown Supplier'}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                              <div className="font-bold text-gray-900 dark:text-white">{parseInt(item.quantity)} units</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Expired On</div>
+                              <div className="font-bold text-red-600 dark:text-red-400">{item.expiryDate}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Days Ago</div>
+                              <div className="font-bold text-red-600 dark:text-red-400">{Math.abs(item.daysUntilExpiry)}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Loss Value</div>
+                              <div className="font-bold text-red-600 dark:text-red-400">{formatCurrency(item.totalCost)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Expiring Soon Products Section */}
+              {expiryData.filter(item => item.status === 'EXPIRING_SOON').length > 0 && (
+                <div>
+                  <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl ${darkMode ? 'bg-yellow-900/30 border border-yellow-800' : 'bg-yellow-50 border border-yellow-200'}`}>
+                    <div className="p-2 bg-yellow-500 rounded-lg">
+                      <FiAlertTriangle className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-yellow-600 dark:text-yellow-400">⚠️ WARNING - Expiring Soon ({expiryData.filter(item => item.status === 'EXPIRING_SOON').length})</h3>
+                      <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70">Products expiring within the next 30 days - Consider promotions or stock rotation</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-3">
+                    {expiryData.filter(item => item.status === 'EXPIRING_SOON').sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry).map((item, index) => (
+                      <div 
+                        key={item.id || index}
+                        className={`flex items-center justify-between p-4 rounded-xl border-l-4 ${
+                          item.daysUntilExpiry <= 7 ? 'border-orange-500' : 'border-yellow-500'
+                        } ${darkMode ? 'bg-gray-700/50' : 'bg-yellow-50/50'} hover:shadow-md transition-shadow`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-lg ${item.daysUntilExpiry <= 7 ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                            <FiClock className={`w-5 h-5 ${item.daysUntilExpiry <= 7 ? 'text-orange-600 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400'}`} />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.productName}</h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">{item.category}</span>
+                              <span>•</span>
+                              <span>Batch: {item.batchNo || 'N/A'}</span>
+                              <span>•</span>
+                              <span>{item.supplier || 'Unknown Supplier'}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                              <div className="font-bold text-gray-900 dark:text-white">{parseInt(item.quantity)} units</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Expiry Date</div>
+                              <div className={`font-bold ${item.daysUntilExpiry <= 7 ? 'text-orange-600 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                                {item.expiryDate}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">Days Left</div>
+                              <div className={`font-bold text-lg ${
+                                item.daysUntilExpiry <= 7 ? 'text-orange-600 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400'
+                              }`}>
+                                {item.daysUntilExpiry}
+                                <span className="text-xs ml-1">days</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">At Risk</div>
+                              <div className={`font-bold ${item.daysUntilExpiry <= 7 ? 'text-orange-600 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                                {formatCurrency(item.totalCost)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* No Alerts */}
+              {expiryData.filter(item => item.status === 'EXPIRED' || item.status === 'EXPIRING_SOON').length === 0 && (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                    <FiCheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">All Clear! 🎉</h3>
+                  <p className="text-gray-600 dark:text-gray-400">No expired or expiring soon products found. Your inventory is in great shape!</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className={`p-4 border-t ${darkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Last updated: {lastUpdated.toLocaleString()}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      handleGenerateReport();
+                      setShowAlertsModal(false);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <FiPrinter className="w-4 h-4" />
+                    Download Report
+                  </button>
+                  <button
+                    onClick={() => setShowAlertsModal(false)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                    }`}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

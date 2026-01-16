@@ -808,21 +808,33 @@ const Audit = () => {
         </html>
       `;
 
-      // Create blob and trigger download
+      // Create blob and trigger download, and also open in new tab for viewing
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
+      
+      // Open in new tab for immediate viewing
+      const newWindow = window.open(url, '_blank');
+      if (newWindow) {
+        newWindow.focus();
+      }
+      
+      // Also trigger download
       const link = document.createElement('a');
       link.href = url;
       link.download = `Audit_Security_Report_${new Date().toISOString().split('T')[0]}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      
+      // Clean up after a delay to allow both operations to complete
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
 
       showAlertMessage("Audit report generated and downloaded successfully!", "success");
     } catch (error) {
       console.error('Report generation error:', error);
-      showAlertMessage("Failed to generate report", "error");
+      showAlertMessage("Failed to generate report: " + error.message, "error");
     }
   };
 
