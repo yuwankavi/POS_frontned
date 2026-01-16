@@ -202,6 +202,7 @@ const Header = ({ activePage }) => {
       'INVENTORY_STORE_TRANSACTION_WRITE_OFF': { title: 'Write Off', icon: 'fas fa-times-circle', description: 'Write off damaged/expired items' },
       'REPORTS_REORDER_LEVEL': { title: 'Re-order Level Report', icon: 'fas fa-chart-line', description: 'View items below reorder level' },
       'REPORTS_DAILY_SUMMARY': { title: 'Daily Summary Report', icon: 'fas fa-calendar-day', description: 'Daily sales and transaction summary' },
+      'REPORTS_AUDIT': { title: 'Audit Report', icon: 'fas fa-user-secret', description: 'Audit logs and actions' },
       'REPORTS_TOTAL_PURCHASING': { title: 'Total Purchasing Report', icon: 'fas fa-shopping-cart', description: 'Total purchasing analysis' }
     };
 

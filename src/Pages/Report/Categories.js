@@ -1915,7 +1915,7 @@ const CategoriesReport = () => {
   };
 
   return (
-    <div className="flex flex-col p-1 md:p-1 rounded-xl shadow-md h-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 border">
+    <div className="flex flex-col p-1 md:p-1 rounded-xl shadow-md h-full overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 border">
       {/* Alert Message */}
       {showAlert && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-down w-full max-w-md px-2 sm:px-0">

@@ -60,6 +60,7 @@ import { inventoryProductReducer,productActiveReducer,productInactiveReducer,pro
 import { batchReducer, batchActiveReducer, batchInactiveReducer } from './reducers/Inventory/batchReducer.js';
 import productReducer1 from './reducers/POS/productReducer.js';
 import { invoiceReducer } from '../src/reducers/POS/invoiceReducer.js';
+import { invoiceReturnReducer } from './reducers/invoiceReturnReducer';
 import { adjustmentListReducer } from './reducers/Inventory/adjustmentReducer.js';
 import { adjustmentAddReducer } from './reducers/Inventory/adjustmentReducer.js';  
 import { salesReturnReducer } from './reducers/Inventory/SalesReturnReducer.js';
@@ -124,6 +125,7 @@ const rootReducer = combineReducers({
   stockAdjustments: stockAdjustmentReducer,
   return: returnReducer,
   invoice: invoiceReducer,
+  invoiceReturn: invoiceReturnReducer,
   adjustment: adjustmentListReducer,
   adjustmentAdd: adjustmentAddReducer,
   salesReturn: salesReturnReducer,

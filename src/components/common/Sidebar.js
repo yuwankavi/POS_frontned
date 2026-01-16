@@ -196,6 +196,7 @@ const Sidebar = ({ setActivePage }) => {
          { id: 'ITEM', label: 'Items', type: 'page', icon: 'fas fa-box-open' },
           { id: 'CATEGORY', label: 'Categories', type: 'page', icon: 'fas fa-tags' },
         { id: 'DAILY_SUMMARY', label: 'Daily Summary', type: 'page', icon: 'fas fa-calendar-day' },
+        { id: 'AUDIT', label: 'Audit', type: 'page', icon: 'fas fa-user-secret' },
         { id: 'EXP_LEVEL', label: 'Near_Expiry', type: 'page', icon: 'fas fa-calendar-times' },
        // { id: 'TOTAL_PURCHASING', label: 'Total Purchasing', type: 'page', icon: 'fas fa-shopping-basket' }
       ]

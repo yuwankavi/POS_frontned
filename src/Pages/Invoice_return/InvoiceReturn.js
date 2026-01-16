@@ -367,7 +367,7 @@ const InvoiceReturn = () => {
                             <td className="px-4 py-2 font-medium">{item.INNO || item.INVOICENO || 'N/A'}</td>
                             <td className="px-4 py-2">{item.CUSTOMERNAME || item.CUSNAME || 'Walk-in'}</td>
                             <td className="px-4 py-2">{formatDate(item.INDATE || item.INVDATE)}</td>
-                            <td className="px-4 py-2 font-semibold">${formatCurrency(item.TOTALAMOUNT)}</td>
+                            <td className="px-4 py-2 font-semibold">{formatCurrency(item.TOTALAMOUNT)}</td>
                             <td className="px-4 py-2">{item.ITEM_COUNT || '1'}</td>
                             <td className="px-4 py-2">{item.CASHIER || item.CAHIERNAME || 'Admin'}</td>
                             <td className="px-4 py-2">
@@ -508,7 +508,7 @@ const InvoiceReturn = () => {
             </div>
           ) : (
             // Invoice Preview - Like Invoice Modal
-            <div className={`rounded-xl overflow-hidden shadow-lg ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+            <div className={`rounded-xl overflow-hidden shadow-lg h-full flex flex-col ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
               {/* Invoice Header - Like Receipt Header */}
               <div className={`p-5 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'} border-b`}>
                 <div className="text-center mb-4">
@@ -546,8 +546,8 @@ const InvoiceReturn = () => {
                 </div>
               </div>
 
-              {/* Invoice Body */}
-              <div className="p-5">
+              {/* Invoice Body - Scrollable Area */}
+              <div className="p-5 overflow-y-auto flex-1 max-h-[calc(100vh-20rem)]">
                 {/* Store & Cashier Info */}
                 <div className={`p-4 rounded-lg mb-6 ${darkMode ? 'bg-gray-600/30' : 'bg-gray-100'}`}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -570,9 +570,9 @@ const InvoiceReturn = () => {
                       <div className="text-sm dark:text-gray-300">
                         <p><span className="font-medium">Method:</span> {invoiceHeader.paymentMethod}</p>
                         <p><span className="font-medium">Cashier:</span> {invoiceHeader.cashierName}</p>
-                        <p><span className="font-medium">Paid:</span> ${formatCurrency(invoiceHeader.paidAmount)}</p>
+                        <p><span className="font-medium">Paid:</span> {formatCurrency(invoiceHeader.paidAmount)}</p>
                         {invoiceHeader.changeAmount > 0 && (
-                          <p><span className="font-medium">Change:</span> ${formatCurrency(invoiceHeader.changeAmount)}</p>
+                          <p><span className="font-medium">Change:</span> {formatCurrency(invoiceHeader.changeAmount)}</p>
                         )}
                       </div>
                     </div>
@@ -624,13 +624,13 @@ const InvoiceReturn = () => {
                               {item.SOLDQTY}
                             </td>
                             <td className="px-4 py-3 text-right dark:text-white">
-                              ${formatCurrency(item.UNITPRICE)}
+                              {formatCurrency(item.UNITPRICE)}
                             </td>
                             <td className="px-4 py-3 text-right dark:text-white">
-                              ${formatCurrency(item.MRP)}
+                              {formatCurrency(item.MRP)}
                             </td>
                             <td className="px-4 py-3 text-right font-semibold dark:text-white">
-                              ${formatCurrency(item.SALESVALUE)}
+                              {formatCurrency(item.SALESVALUE)}
                             </td>
                           </tr>
                         ))}
@@ -644,27 +644,27 @@ const InvoiceReturn = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="dark:text-white">Subtotal:</span>
-                      <span className="dark:text-white">${formatCurrency(totals.subtotal)}</span>
+                      <span className="dark:text-white">{formatCurrency(totals.subtotal)}</span>
                     </div>
                     
                     {totals.discount > 0 && (
                       <div className="flex justify-between text-red-600 dark:text-red-400">
                         <span>Discount:</span>
-                        <span>-${formatCurrency(totals.discount)}</span>
+                        <span>-{formatCurrency(totals.discount)}</span>
                       </div>
                     )}
                     
                     {totals.tax > 0 && (
                       <div className="flex justify-between">
                         <span className="dark:text-white">Tax:</span>
-                        <span className="dark:text-white">${formatCurrency(totals.tax)}</span>
+                        <span className="dark:text-white">{formatCurrency(totals.tax)}</span>
                       </div>
                     )}
                     
                     <div className="flex justify-between pt-2 border-t border-gray-300 dark:border-gray-600">
                       <span className="text-lg font-bold dark:text-white">TOTAL:</span>
                       <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                        ${formatCurrency(totals.total)}
+                        {formatCurrency(totals.total)}
                       </span>
                     </div>
                   </div>
@@ -684,10 +684,10 @@ const InvoiceReturn = () => {
                           <div key={index} className="text-sm">
                             <div className="font-medium dark:text-white">{item.PRDESC}</div>
                             <div className="text-gray-600 dark:text-gray-400">
-                              Profit: ${formatCurrency(item.PROFIT_PER_UNIT)}/unit
+                              Profit: {formatCurrency(item.PROFIT_PER_UNIT)}/unit
                             </div>
                             <div className="text-green-600 dark:text-green-400 font-semibold">
-                              Total: ${formatCurrency(item.TOTAL_PROFIT)}
+                              Total: {formatCurrency(item.TOTAL_PROFIT)}
                             </div>
                           </div>
                         ))}
@@ -716,8 +716,10 @@ const InvoiceReturn = () => {
                     </p>
                   </div>
                 </div>
+              </div>
 
-                {/* Action Buttons */}
+              {/* Action Buttons - Fixed at Bottom */}
+              <div className={`p-5 border-t ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={handleReset}
@@ -779,7 +781,7 @@ const InvoiceReturn = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Total Amount:</span>
-                    <span className="font-semibold text-green-600">${formatCurrency(totals.total)}</span>
+                    <span className="font-semibold text-green-600">{formatCurrency(totals.total)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Customer:</span>

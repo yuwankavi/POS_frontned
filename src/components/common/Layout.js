@@ -157,6 +157,7 @@ import TotalPur from "../../Pages/Report/Total_Purchasing";
 import CashierReport from "../../Pages/Report/Cashier";
 import ItemsReport from "../../Pages/Report/Items";
 import CategoriesReport from "../../Pages/Report/Categories";
+import Audit from "../../Pages/Report/Audit";
 import Batches from "../../Pages/inventory/Product/ProductBatches";
 import Brand from "../../Pages/inventory/Product/ProductBrand";
 import Bincard from "../../Pages/inventory/Bincard";
@@ -248,6 +249,7 @@ const Layout = () => {
           {activePage === "REPORTS_CASHIER" && <CashierReport />}
           {activePage === "REPORTS_ITEM" && <ItemsReport />}
           {activePage === "REPORTS_CATEGORY" && <CategoriesReport />}
+          {activePage === "REPORTS_AUDIT" && <Audit />}
           {activePage.endsWith("REORDER_LEVEL") && <Reorder />}
           {activePage.endsWith("DAILY_SUMMARY") && <Daily_sum />}
           {activePage.endsWith("TOTAL_PURCHASING") && <TotalPur />}

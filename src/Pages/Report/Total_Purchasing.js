@@ -295,7 +295,7 @@ const TotalPur = () => {
   const totals = calculateTotals();
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full overflow-auto">
+    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full overflow-y-auto">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
         <div>

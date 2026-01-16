@@ -39,6 +39,70 @@ import FilterByDate from "../../components/modals/filterByDate.js";
 
 import { generateDailySummaryReport } from "../../utils/printUtils.js";
 
+// Helper function to parse date strings in various formats including "M/D/YYYY h:mm:ss AM/PM"
+const parseDateTime = (dateStr) => {
+  if (!dateStr) return null;
+  
+  try {
+    // Try ISO format first (contains 'T')
+    if (dateStr.includes('T')) {
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) return date;
+    }
+    
+    // Handle "M/D/YYYY h:mm:ss AM/PM" format (e.g., "1/4/2026 1:10:25 AM")
+    const amPmMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)$/i);
+    if (amPmMatch) {
+      const [, month, day, year, hours, minutes, seconds, ampm] = amPmMatch;
+      let hour24 = parseInt(hours);
+      
+      // Convert 12-hour to 24-hour format
+      if (ampm.toUpperCase() === 'PM' && hour24 !== 12) {
+        hour24 += 12;
+      } else if (ampm.toUpperCase() === 'AM' && hour24 === 12) {
+        hour24 = 0;
+      }
+      
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), hour24, parseInt(minutes), parseInt(seconds));
+      if (!isNaN(date.getTime())) return date;
+    }
+    
+    // Handle "M/D/YYYY H:mm:ss" format (24-hour without AM/PM)
+    const match24h = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+    if (match24h) {
+      const [, month, day, year, hours, minutes, seconds] = match24h;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), parseInt(seconds));
+      if (!isNaN(date.getTime())) return date;
+    }
+    
+    // Fallback: try replacing space with T for standard parsing
+    const date = new Date(dateStr.replace(' ', 'T'));
+    if (!isNaN(date.getTime())) return date;
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+// Get hour from item using INDATE or INNOVICED_ON fields
+const getHourFromItem = (item) => {
+  // Try INDATE first (primary field from API)
+  let date = parseDateTime(item.INDATE);
+  
+  // Fallback to INNOVICED_ON
+  if (!date) {
+    date = parseDateTime(item.INNOVICED_ON);
+  }
+  
+  if (date) {
+    return date.getHours();
+  }
+  
+  // Return null if no valid date found
+  return null;
+};
+
 export default function DailySummary() {
   const dispatch = useDispatch();
   const { darkMode } = useSelector((state) => state.ui);
@@ -202,39 +266,10 @@ export default function DailySummary() {
 
 
     dataArray.forEach(item => {
-      let hour;
-
-
-      if (item.INNOVICED_ON) {
-        try {
-          const dateStr = item.INNOVICED_ON;
-          let date;
-
-
-          if (dateStr.includes('T')) {
-            date = new Date(dateStr);
-          } else {
-
-            date = new Date(dateStr.replace(' ', 'T'));
-          }
-
-          if (!isNaN(date.getTime())) {
-
-            hour = date.getHours();
-
-          } else {
-
-            hour = new Date().getHours();
-          }
-        } catch (error) {
-
-          hour = new Date().getHours();
-        }
-      } else {
-
-        hour = new Date().getHours();
-      }
-
+      const hour = getHourFromItem(item);
+      
+      // Skip items with invalid dates
+      if (hour === null) return;
 
       const hour12 = hour % 12 || 12;
       const ampm = hour < 12 ? 'AM' : 'PM';
@@ -283,32 +318,10 @@ export default function DailySummary() {
 
 
     dataArray.forEach(item => {
-      let hour;
-
-      if (item.INNOVICED_ON) {
-        try {
-          const dateStr = item.INNOVICED_ON;
-          let date;
-
-          if (dateStr.includes('T')) {
-            date = new Date(dateStr);
-          } else {
-            date = new Date(dateStr.replace(' ', 'T'));
-          }
-
-          if (!isNaN(date.getTime())) {
-            hour = date.getHours();
-          } else {
-            hour = new Date().getHours();
-          }
-        } catch (error) {
-
-          hour = new Date().getHours();
-        }
-      } else {
-        hour = new Date().getHours();
-      }
-
+      const hour = getHourFromItem(item);
+      
+      // Skip items with invalid dates
+      if (hour === null) return;
 
       const hour12 = hour % 12 || 12;
       const ampm = hour < 12 ? 'AM' : 'PM';
@@ -384,32 +397,10 @@ export default function DailySummary() {
 
 
     dataArray.forEach(item => {
-      let hour;
-
-      if (item.INNOVICED_ON) {
-        try {
-          const dateStr = item.INNOVICED_ON;
-          let date;
-
-          if (dateStr.includes('T')) {
-            date = new Date(dateStr);
-          } else {
-            date = new Date(dateStr.replace(' ', 'T'));
-          }
-
-          if (!isNaN(date.getTime())) {
-            hour = date.getHours();
-          } else {
-            hour = new Date().getHours();
-          }
-        } catch (error) {
-
-          hour = new Date().getHours();
-        }
-      } else {
-        hour = new Date().getHours();
-      }
-
+      const hour = getHourFromItem(item);
+      
+      // Skip items with invalid dates
+      if (hour === null) return;
 
       const hour12 = hour % 12 || 12;
       const ampm = hour < 12 ? 'AM' : 'PM';
@@ -537,7 +528,7 @@ export default function DailySummary() {
   };
 
   return (
-    <div className={`flex flex-col p-1 md:p-1 rounded-xl shadow-md h-full ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+    <div className={`flex flex-col p-1 md:p-1 rounded-xl shadow-md h-full overflow-y-auto ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
       } border`}>
 
       {/* Alert Message */}

@@ -15,7 +15,38 @@ export const invoiceReturnService = {
     };
 
     try {
-      const response = await axios.get(`${API_URL}/SRD/GetAllSRD`, config);
+      // Use the accurate endpoint for invoice returns
+      const response = await axios.get(`${API_URL}/SRD/GetAllInvoiceDetails`, config);
+
+      // Debug log the raw response for easier troubleshooting
+      console.debug('GetAllInvoiceDetails response:', response.data);
+
+      // Normalize common API shapes so UI table columns map correctly
+      let rawList = [];
+      if (response.data) {
+        if (Array.isArray(response.data.ResultSet)) rawList = response.data.ResultSet;
+        else if (Array.isArray(response.data)) rawList = response.data;
+        else if (Array.isArray(response.data.resultSet)) rawList = response.data.resultSet;
+      }
+
+      if (rawList.length > 0) {
+        const mapped = rawList.map(item => ({
+          INNO: item.INNO || item.INVOICENO || item.InvoiceNo || '',
+          CUSNAME: item.CUSNAME || item.CUSTOMERNAME || item.Customer || 'Walk-in',
+          INDATE: item.INDATE || item.INVDATE || item.Date || null,
+          MRP: item.MRP || item.UNITPRICE || item.Price || item.Total || '0.00',
+          SOLDQTY: item.SOLDQTY || item.ITEM_COUNT || item.Quantity || '1',
+          CAHIERNAME: item.CAHIERNAME || item.CASHIER || item.Cashier || 'Admin',
+          // keep other fields if component uses them
+          TOTALAMOUNT: item.TOTALAMOUNT || item.SALESVALUE || item.Total || item.MRP || '0.00',
+          ITEM_COUNT: item.ITEM_COUNT || item.ITEMS || item.SOLDQTY || item.Quantity || '1',
+          ...item
+        }));
+
+        // Return same shape but with mapped ResultSet so reducers/actions receive expected data
+        return { ...response.data, ResultSet: mapped };
+      }
+
       return response.data;
     } catch (error) {
       console.error('Error fetching sales returns:', error);
