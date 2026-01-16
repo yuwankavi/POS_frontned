@@ -368,7 +368,7 @@ const InvoiceReturn = () => {
                             <td className="px-4 py-2">{item.CUSTOMERNAME || item.CUSNAME || 'Walk-in'}</td>
                             <td className="px-4 py-2">{formatDate(item.INDATE || item.INVDATE)}</td>
                             <td className="px-4 py-2 font-semibold">{formatCurrency(item.TOTALAMOUNT)}</td>
-                            <td className="px-4 py-2">{item.ITEM_COUNT || '1'}</td>
+                            <td className="px-4 py-2">{parseInt(item.ITEM_COUNT || item.SOLDQTY || '1')}</td>
                             <td className="px-4 py-2">{item.CASHIER || item.CAHIERNAME || 'Admin'}</td>
                             <td className="px-4 py-2">
                               <button
@@ -621,7 +621,7 @@ const InvoiceReturn = () => {
                               </span>
                             </td>
                             <td className="px-4 py-3 text-center dark:text-white font-semibold">
-                              {item.SOLDQTY}
+                              {parseInt(item.SOLDQTY || '0')}
                             </td>
                             <td className="px-4 py-3 text-right dark:text-white">
                               {formatCurrency(item.UNITPRICE)}

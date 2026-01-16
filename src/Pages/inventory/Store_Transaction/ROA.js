@@ -161,7 +161,7 @@ const ROA = () => {
                         <tr key={`${it.PB_ProCode}-${idx}`} className={`transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}>
                           <td className="px-4 py-2">{it.PB_ProDes || it.PB_ProCode}</td>
                           <td className="px-4 py-2">{it.PB_WHName || it.PB_WHCode}</td>
-                          <td className="px-4 py-2 text-right">{it.PB_BLQty}</td>
+                          <td className="px-4 py-2 text-right">{parseInt(it.PB_BLQty || 0)}</td>
                           <td className="px-4 py-2 text-right">
                             {isLow ? (
                               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
