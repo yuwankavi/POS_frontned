@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { API_URL } from "../../config";
 
-const AUTH_KEY = localStorage.getItem("token");
-const token = localStorage.getItem("token");
+// Helper to get fresh token on each call
+const getAuthKey = () => localStorage.getItem("token");
 
 const adjustmentService = {
   // ✅ Get all Adjustments
@@ -12,7 +12,7 @@ const adjustmentService = {
       const { data } = await axios.get(`${API_URL}/ADJ/GetADJDetails`, {
         headers: {
           "Content-Type": "application/json",
-          "auth-key": token,
+          "auth-key": getAuthKey(),
         },
       });
       return data?.ResultSet || [];
@@ -28,7 +28,7 @@ const adjustmentService = {
       const { data } = await axios.post(`${API_URL}/AddADJ/AddADJ`, payload, {
         headers: {
           "Content-Type": "application/json",
-          "auth-key": token,
+          "auth-key": getAuthKey(),
         },
       });
       return data;

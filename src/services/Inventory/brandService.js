@@ -2,7 +2,8 @@ import axios from "axios";
 import { getBrandbyID } from "../../actions/Inventory/brandActions";
 import { API_URL } from "../../config";
 
-const AUTH_KEY = localStorage.getItem("token");
+// Helper to get fresh token on each call
+const getAuthKey = () => localStorage.getItem("token");
 
 
 const brandService = {
@@ -17,7 +18,7 @@ const brandService = {
 
       const response = await axios.get(url, {
         headers: {
-          "auth-key": AUTH_KEY,  // <-- add the auth-key here
+          "auth-key": getAuthKey(),
         },
       });
 
@@ -27,15 +28,12 @@ const brandService = {
       throw error;
     }
   },
-      //     "auth-key": AUTH_KEY,  // <-- add the auth-key here
-      //   },
-      // });
 
   async getAll() {
     try {
       const response = await axios.get(`${API_URL}/Product/GetBrand`, {
         headers: {
-          "auth-key": AUTH_KEY,  // <-- add the auth-key here
+          "auth-key": getAuthKey(),
         },
       });
 
@@ -53,7 +51,7 @@ const brandService = {
         `${API_URL}/Product/GetBrandById?P_BRID=${P_BRID}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,  // <-- add the auth-key here
+            "auth-key": getAuthKey(),
           }
         }
       );
@@ -73,7 +71,7 @@ const brandService = {
         `${API_URL}/Product/GetBrand?P_STATUS=${P_STATUS}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,  // <-- add the auth-key here
+            "auth-key": getAuthKey(),
           }
         }
       );
@@ -92,7 +90,7 @@ const brandService = {
         `${API_URL}/Product/GetBrand?P_STATUS=A`,
         {
           headers: {
-            "auth-key": AUTH_KEY,  // <-- add the auth-key here
+            "auth-key": getAuthKey(),
           },
         }
 
@@ -111,7 +109,7 @@ const brandService = {
         `${API_URL}/Product/GetBrand?P_STATUS=I`,
         {
           headers: {
-            "auth-key": AUTH_KEY,  // <-- add the auth-key here
+            "auth-key": getAuthKey(),
           }
         }
       );
@@ -130,7 +128,7 @@ const brandService = {
         `${API_URL}/Product/BrandStatusUpdate?P_BRID=${P_BRID}&P_STATUS=${P_STATUS}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,  // <-- add the auth-key here
+            "auth-key": getAuthKey(),
           }
         }
       );
@@ -140,36 +138,6 @@ const brandService = {
       throw error;
     }
   },
-
-  // async getAll() {
-  //   try {
-  //     const response = await axios.get(`${API_URL}/Product/GetBrand`, {
-  //       headers: {
-  //         "auth-key": AUTH_KEY,  // <-- add the auth-key here
-  //       },
-  //     });
-
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Error in getAllBrands service:", error);
-  //     throw error;
-  //   }
-  // },
-
-//  { async getAll() {
-//     try {
-//       const response = await axios.get(`${API_URL}/Brand/GetBrandList`, {
-//         headers: {
-//           "auth-key": AUTH_KEY,  // <-- include here too
-//         },
-//       });
-
-//       return response.data;
-//     } catch (error) {
-//       console.error("Error fetching brands:", error);
-//       throw error;
-//     }
-//   },
 };
 
 export default brandService;

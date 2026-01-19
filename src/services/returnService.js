@@ -2,15 +2,14 @@ import axios from 'axios';
 
 import { API_URL } from "../config";
 
-const AUTH_KEY = localStorage.getItem("token");
-
- 
+// Helper to get fresh token on each call
+const getAuthKey = () => localStorage.getItem("token");
 
 export const returnService = { 
   createSalesReturn: async (returnData, token) => {
     const config = {
       headers: {
-        'auth-key': AUTH_KEY,
+        'auth-key': getAuthKey(),
         'Content-Type': 'application/json'
       }
     };
@@ -22,7 +21,7 @@ export const returnService = {
   getInvoiceDetails: async (invoiceNumber, token) => {
     const config = {
       headers: {
-        'auth-key': AUTH_KEY,
+        'auth-key': getAuthKey(),
         'Content-Type': 'application/json'
       }
     };
@@ -37,7 +36,7 @@ export const returnService = {
   getProductQuantity: async (productCode, invoiceNumber,batchId) => {
     const config = {
       headers: {
-        'auth-key': AUTH_KEY,
+        'auth-key': getAuthKey(),
         'Content-Type': 'application/json'
       }
     };

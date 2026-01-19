@@ -2,7 +2,8 @@ import axios from "axios";
 
 import { API_URL } from "../config";
 
-const AUTH_KEY = localStorage.getItem("token");
+// Helper to get fresh token on each call
+const getAuthKey = () => localStorage.getItem("token");
  
 const supplierService = {
   async addSupplier(supplier) {
@@ -36,7 +37,7 @@ const supplierService = {
 
       const response = await axios.get(url, {
         headers: {
-          "auth-key": AUTH_KEY,
+          "auth-key": getAuthKey(),
         },
       });
 
@@ -68,7 +69,7 @@ const supplierService = {
         `${API_URL}/Supplier/GetSupplierByCode?P_SUPCODE=${id}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -86,7 +87,7 @@ const supplierService = {
         `${API_URL}/Supplier/SupplierStatusUpdate?P_STATUS=${status}&P_SUPCODE=${id}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -103,7 +104,7 @@ const supplierService = {
         `${API_URL}/Supplier/GetAllSuppliers?P_STATUS=${status}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -121,7 +122,7 @@ const supplierService = {
         `${API_URL}/Supplier/GetAllSuppliers?P_STATUS=${status}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -138,7 +139,7 @@ async getSupplierByStatus(status) {
       `${API_URL}/Supplier/GetAllSuppliers?P_STATUS=${status}`,
       {
         headers: {
-          "auth-key": AUTH_KEY,
+          "auth-key": getAuthKey(),
         },
       }
     );

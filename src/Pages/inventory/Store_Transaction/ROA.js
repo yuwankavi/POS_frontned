@@ -14,6 +14,7 @@ const ROA = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
 
   const load = async () => {
@@ -23,6 +24,7 @@ const ROA = () => {
       const res = await reorderAlertService.getReorderLevel();
       const items = res?.ResultSet || [];
       setData(items);
+      setTotalItems(res?.totalItems || items.length);
     } catch (err) {
       setError(err.message || 'Failed to load reorder data');
     } finally {
@@ -34,20 +36,19 @@ const ROA = () => {
     load();
   }, []);
 
+  // Filter by search term using new field names
   const filtered = data.filter((it) => {
     if (!searchTerm) return true;
     const q = searchTerm.toLowerCase();
     return (
-      (it.PB_ProDes || '').toString().toLowerCase().includes(q) ||
-      (it.PB_ProCode || '').toString().toLowerCase().includes(q) ||
-      (it.PB_WHName || '').toString().toLowerCase().includes(q)
+      (it.PPDES || '').toString().toLowerCase().includes(q) ||
+      (it.PPROCODE || '').toString().toLowerCase().includes(q) ||
+      (it.PWHCODE || '').toString().toLowerCase().includes(q)
     );
   });
 
-  const lowStock = filtered.filter((it) => {
-    const qty = parseFloat(it.PB_BLQty || 0);
-    return !Number.isNaN(qty) && qty <= 10;
-  });
+  // Get unique warehouses count
+  const warehouseCount = Array.from(new Set(data.map(d => d.PWHCODE))).filter(Boolean).length;
 
   return (
     <div className={`flex flex-col p-1 md:p-1 rounded-xl shadow-md h-full ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
@@ -71,7 +72,7 @@ const ROA = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Total Items</p>
-                <p className="text-sm font-bold text-blue-600 dark:text-blue-300">{data.length}</p>
+                <p className="text-sm font-bold text-blue-600 dark:text-blue-300">{totalItems}</p>
               </div>
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                 <FiHome className="w-4 h-4 text-blue-600 dark:text-blue-300" />
@@ -83,7 +84,7 @@ const ROA = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Low Stock</p>
-                <p className="text-sm font-bold text-red-600 dark:text-red-400">{data.filter(it => parseFloat(it.PB_BLQty||0) <= 10).length}</p>
+                <p className="text-sm font-bold text-red-600 dark:text-red-400">{data.length}</p>
               </div>
               <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
                 <FiAlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
@@ -95,7 +96,7 @@ const ROA = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Warehouses</p>
-                <p className="text-sm font-bold text-green-600 dark:text-green-300">{Array.from(new Set(data.map(d => d.PB_WHName))).filter(Boolean).length}</p>
+                <p className="text-sm font-bold text-green-600 dark:text-green-300">{warehouseCount}</p>
               </div>
               <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
                 <FiPackage className="w-4 h-4 text-green-600 dark:text-green-300" />
@@ -154,16 +155,17 @@ const ROA = () => {
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {lowStock.map((it, idx) => {
-                      const qty = parseFloat(it.PB_BLQty || 0);
-                      const isLow = !Number.isNaN(qty) && qty <= 10;
+                    {filtered.map((it, idx) => {
+                      const balanceQty = parseFloat(it.PBALQTY) || 0;
+                      const reorderLevel = parseFloat(it.PREOLEVEL) || 0;
+                      const needsReorder = reorderLevel >= balanceQty;
                       return (
-                        <tr key={`${it.PB_ProCode}-${idx}`} className={`transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}>
-                          <td className="px-4 py-2">{it.PB_ProDes || it.PB_ProCode}</td>
-                          <td className="px-4 py-2">{it.PB_WHName || it.PB_WHCode}</td>
-                          <td className="px-4 py-2 text-right">{parseInt(it.PB_BLQty || 0)}</td>
+                        <tr key={`${it.PPROCODE}-${idx}`} className={`transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}>
+                          <td className="px-4 py-2">{it.PPDES || `Product ${it.PPROCODE}`}</td>
+                          <td className="px-4 py-2">{it.PWHCODE}</td>
+                          <td className="px-4 py-2 text-right">{parseInt(balanceQty)}</td>
                           <td className="px-4 py-2 text-right">
-                            {isLow ? (
+                            {needsReorder ? (
                               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
                                 <FiAlertTriangle className="w-3 h-3" /> Reorder
                               </span>
@@ -178,37 +180,12 @@ const ROA = () => {
                 </table>
               </div>
 
-              {lowStock.length === 0 && (
+              {filtered.length === 0 && (
                 <div className="text-center py-8">
                   <FiPackage className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm font-medium text-gray-600">No items found</p>
+                  <p className="text-sm font-medium text-gray-600">No items need reordering</p>
                 </div>
               )}
-
-              {/* Low stock summary */}
-              {/* <div className="mt-4">
-                <h4 className="text-sm font-semibold">Low stock items (&lt;= 10)</h4>
-                <div className="mt-2 space-y-2">
-                  {lowStock.length === 0 ? (
-                    <div className="text-sm text-gray-600">No low-stock items.</div>
-                  ) : (
-                    lowStock.map((it, i) => (
-                      <div key={`${it.PB_ProCode}-low-${i}`} className="p-2 rounded-lg border bg-white dark:bg-gray-800">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium">{it.PB_ProDes}</div>
-                            <div className="text-xs text-gray-500">{it.PB_WHName} • Code: {it.PB_ProCode}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold text-red-600">{it.PB_BLQty}</div>
-                            <div className="text-xs text-gray-500">Balance</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div> */}
-              {/* </div> */}
             </div>
           )}
         </div>

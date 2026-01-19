@@ -2,7 +2,8 @@ import axios from "axios";
 
 import { API_URL } from "../../config";
 
-const AUTH_KEY = localStorage.getItem("token");
+// Helper to get fresh token on each call
+const getAuthKey = () => localStorage.getItem("token");
 
 const batchService = {
   async addBatch(batch) {
@@ -30,7 +31,7 @@ const batchService = {
 
       const response = await axios.get(url, {
         headers: {
-          "auth-key": AUTH_KEY, // <-- add the auth-key here
+          "auth-key": getAuthKey(),
         },
       });
 
@@ -48,7 +49,7 @@ const batchService = {
         `${API_URL}/ProductBatches/GetBatchDetails`,
         {
           headers: {
-            "auth-key": AUTH_KEY, // <-- include here too
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -66,7 +67,7 @@ const batchService = {
         `${API_URL}/ProductBatches/GetBatchDetails`,
         {
           headers: {
-            "auth-key": AUTH_KEY, // <-- include here too
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -85,7 +86,7 @@ const batchService = {
         `${API_URL}/ProductBatches/GetIBatchDetails`,
         {
           headers: {
-            "auth-key": AUTH_KEY, // <-- include here too
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -101,7 +102,7 @@ const batchService = {
     try {
       const url = `${API_URL}/ProductBatches/UpdateBatchStatus?P_BATCHID=${batchId}&P_STATUS=${newStatus}`;
       const response = await axios.get(url, {
-        headers: { "auth-key": AUTH_KEY },
+        headers: { "auth-key": getAuthKey() },
       });
       return response.data;
     } catch (error) {
@@ -109,21 +110,6 @@ const batchService = {
       throw error;
     }
   },
-
-  //   async getAll() {
-  //     try {
-  //         const response = await axios.get(`${API_URL}/Warehouse/GetWHList`, {
-  //         headers: {
-  //           "auth-key": AUTH_KEY,  // <-- include here too
-  //         },
-  //       });
-
-  //       return response.data;
-  //     } catch (error) {
-  //       console.error("Error fetching warehouses:", error);
-  //       throw error;
-  //     }
-  //   },
 };
 
 export default batchService;

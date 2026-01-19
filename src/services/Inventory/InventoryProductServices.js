@@ -3,9 +3,8 @@ import { addInventoryProduct } from "../../actions/Inventory/inventoryProductAct
 import { data } from "autoprefixer";
 import { API_URL } from '../../config'
 
-
-
-const AUTH_KEY = localStorage.getItem("token");
+// Helper to get fresh token on each call
+const getAuthKey = () => localStorage.getItem("token");
 
 const InventoryProductService = {
 
@@ -28,7 +27,7 @@ const InventoryProductService = {
         formData,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
             "Content-Type": "multipart/form-data",
           },
         }
@@ -45,7 +44,7 @@ const InventoryProductService = {
     try {
       const response = await axios.get(`${API_URL}/Product/GetProductCat`, {
         headers: {
-          "auth-key": AUTH_KEY,
+          "auth-key": getAuthKey(),
         },
       });
 
@@ -64,7 +63,7 @@ const InventoryProductService = {
         `${API_URL}/Product/GetProductCatByID?P_CODE=${productCode}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
             "Content-Type": "application/json",
           },
         }
@@ -83,7 +82,7 @@ const InventoryProductService = {
         `${API_URL}/Product/GetProductCat?P_STATUS=${P_STATUS}`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -100,7 +99,7 @@ const InventoryProductService = {
         `${API_URL}/Product/GetProductCat?P_STATUS=A`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -117,7 +116,7 @@ const InventoryProductService = {
         `${API_URL}/Product/GetProductCat?P_STATUS=I`,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
           },
         }
       );
@@ -131,7 +130,7 @@ const InventoryProductService = {
   async updateStatus(PC_Code, newStatus) {
     try {
       const url = `${API_URL}/Product/ProductCatStatusUpdate?P_CODE=${encodeURIComponent(PC_Code)}&P_STATUS=${encodeURIComponent(newStatus)}`;
-      const response = await axios.get(url, { headers: { "auth-key": AUTH_KEY } });
+      const response = await axios.get(url, { headers: { "auth-key": getAuthKey() } });
       return response.data;
     } catch (error) {
 
@@ -158,7 +157,7 @@ const InventoryProductService = {
         formData,
         {
           headers: {
-            "auth-key": AUTH_KEY,
+            "auth-key": getAuthKey(),
             "Content-Type": "multipart/form-data",
           },
         }
