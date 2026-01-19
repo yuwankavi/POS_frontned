@@ -250,7 +250,7 @@ const InvoiceReturn = () => {
   const invoiceHeader = getInvoiceHeader();
 
   return (
-    <div className={`flex flex-col p-4 md:p-6 rounded-xl shadow-md min-h-screen ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
+    <div className={`flex flex-col p-4 md:p-6 rounded-xl shadow-md min-h-screen ${isInvoiceLoaded ? 'pb-28 sm:pb-20' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
       
       {/* Alert Message */}
       {showAlert && (
@@ -711,49 +711,54 @@ const InvoiceReturn = () => {
                       background={darkMode ? "#1F2937" : "#FFFFFF"}
                       lineColor={darkMode ? "#FFFFFF" : "#000000"}
                     />
+                    
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                       Scan this barcode for quick invoice lookup
                     </p>
+                    <br></br><br></br><br></br><br></br>
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons - Fixed at Bottom */}
-              <div className={`p-5 border-t ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={handleReset}
-                    className={`px-5 py-2 rounded-lg font-medium ${darkMode
-                        ? 'bg-gray-600 hover:bg-gray-700 text-gray-200'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                      } transition-colors flex items-center gap-2`}
-                  >
-                    <FiArrowLeft className="w-4 h-4" />
-                    Load Another
-                  </button>
-                  <button
-                    onClick={() => setIsPrintModalOpen(true)}
-                    disabled={printLoading}
-                    className="px-5 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {printLoading ? (
-                      <>
-                        <FiRefreshCw className="w-4 h-4 animate-spin" />
-                        Printing...
-                      </>
-                    ) : (
-                      <>
-                        <FiPrinter className="w-4 h-4" />
-                        Print Invoice
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+           
             </div>
           )}
         </div>
       </div>
+
+      {/* Fixed Action Buttons - Always visible at bottom */}
+      {isInvoiceLoaded && (
+        <div className={`fixed bottom-0 left-0 right-0 p-4 border-t shadow-lg z-40 ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+            <button
+              onClick={handleReset}
+              className={`w-full sm:w-auto px-5 py-3 sm:py-2 rounded-lg font-medium ${darkMode
+                  ? 'bg-gray-600 hover:bg-gray-700 text-gray-200'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                } transition-colors flex items-center justify-center gap-2`}
+            >
+              <FiArrowLeft className="w-4 h-4" />
+              Load Another
+            </button>
+            <button
+              onClick={() => setIsPrintModalOpen(true)}
+              disabled={printLoading}
+              className="w-full sm:w-auto px-5 py-3 sm:py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {printLoading ? (
+                <>
+                  <FiRefreshCw className="w-4 h-4 animate-spin" />
+                  Printing...
+                </>
+              ) : (
+                <>
+                  <FiPrinter className="w-4 h-4" />
+                  Print Invoice
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Print Confirmation Modal */}
       {isPrintModalOpen && (

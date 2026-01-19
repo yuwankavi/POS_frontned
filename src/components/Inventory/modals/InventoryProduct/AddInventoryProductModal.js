@@ -845,6 +845,7 @@ export default function AddInventoryProductModal() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileName, setFileName] = useState("");
   const [fileError, setFileError] = useState("");
+  const [stockValidationError, setStockValidationError] = useState("");
   const [isGeneratingSKU, setIsGeneratingSKU] = useState(false);
   const [isSubCategoryModalOpen, setIsSubCategoryModalOpen] = useState(false);
   const unitState = useSelector((state) => state.unitActiveList) || {};
@@ -998,10 +999,23 @@ export default function AddInventoryProductModal() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
 
     if (name === "P_UNIT") {
       setUnit(value);
+    }
+
+    // Real-time validation for Re-Order Level and Minimum Stock
+    if (name === "P_REOLEVEL" || name === "P_MINSTOCK") {
+      const reorderLevel = parseFloat(name === "P_REOLEVEL" ? value : updatedFormData.P_REOLEVEL) || 0;
+      const minStock = parseFloat(name === "P_MINSTOCK" ? value : updatedFormData.P_MINSTOCK) || 0;
+      
+      if (updatedFormData.P_REOLEVEL && updatedFormData.P_MINSTOCK && reorderLevel < minStock) {
+        setStockValidationError("Re-Order Level must be greater than or equal to Minimum Stock");
+      } else {
+        setStockValidationError("");
+      }
     }
   };
 
@@ -1134,6 +1148,13 @@ export default function AddInventoryProductModal() {
       return;
     }
 
+    // Validate Re-Order Level must be greater than or equal to Minimum Stock
+    const reorderLevel = parseFloat(formData.P_REOLEVEL) || 0;
+    const minStock = parseFloat(formData.P_MINSTOCK) || 0;
+    if (formData.P_REOLEVEL && formData.P_MINSTOCK && reorderLevel < minStock) {
+      setStockValidationError("Re-Order Level must be greater than or equal to Minimum Stock");
+      return;
+    }
 
     if (selectedFile) {
       const maxSize = 5 * 1024 * 1024; // 5MB in bytes
@@ -1580,11 +1601,17 @@ export default function AddInventoryProductModal() {
                   placeholder="Enter Minimum Stock"
                   value={formData.P_MINSTOCK}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 text-sm ${darkMode
+                  className={`w-full px-3 py-2 rounded-lg border focus:ring-2 text-sm ${stockValidationError
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                    } ${darkMode
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-gray-50 border-gray-200 text-gray-900"
                     }`}
                 />
+                {stockValidationError && (
+                  <p className="text-xs text-red-500 mt-1">{stockValidationError}</p>
+                )}
               </div>
 
               {/* Type */}
