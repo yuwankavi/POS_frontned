@@ -708,73 +708,173 @@ const PurchaseOrder = () => {
           </div>
 
           {/* Orders Table */}
-          <div className={`rounded-xl overflow-hidden border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+          <div className={`rounded-xl overflow-hidden border shadow-sm ${darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-white'}`}>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <tr className={`text-left text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <th className="px-4 py-3 font-medium">PO Number</th>
-                    <th className="px-4 py-3 font-medium">Supplier</th>
-                    <th className="px-4 py-3 font-medium">Items</th>
-                    <th className="px-4 py-3 font-medium">Total Amount</th>
-                    <th className="px-4 py-3 font-medium">Order Date</th>
-                    <th className="px-4 py-3 font-medium">Expected</th>
-                    <th className="px-4 py-3 font-medium">Created By</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Actions</th>
+              <table className="w-full min-w-[900px]">
+                <thead className={`${darkMode ? 'bg-gray-700/80' : 'bg-gradient-to-r from-gray-50 to-gray-100'}`}>
+                  <tr className={`text-xs uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <th className="px-4 py-3.5 text-left font-semibold whitespace-nowrap w-24">
+                      <span className="flex items-center gap-1.5">
+                        <FiHash className="w-3.5 h-3.5" />
+                        PO #
+                      </span>
+                    </th>
+                    <th className="px-4 py-3.5 text-left font-semibold whitespace-nowrap min-w-[180px]">
+                      <span className="flex items-center gap-1.5">
+                        <FiTruck className="w-3.5 h-3.5" />
+                        Supplier
+                      </span>
+                    </th>
+                    <th className="px-3 py-3.5 text-center font-semibold whitespace-nowrap w-16">
+                      <span className="flex items-center justify-center gap-1">
+                        <FiBox className="w-3.5 h-3.5" />
+                        Qty
+                      </span>
+                    </th>
+                    <th className="px-4 py-3.5 text-right font-semibold whitespace-nowrap w-28">
+                      <span className="flex items-center justify-end gap-1.5">
+                        <FiDollarSign className="w-3.5 h-3.5" />
+                        Amount
+                      </span>
+                    </th>
+                    <th className="px-4 py-3.5 text-left font-semibold whitespace-nowrap w-28">
+                      <span className="flex items-center gap-1.5">
+                        <FiCalendar className="w-3.5 h-3.5" />
+                        Ordered
+                      </span>
+                    </th>
+                    <th className="px-4 py-3.5 text-left font-semibold whitespace-nowrap w-28">
+                      <span className="flex items-center gap-1.5">
+                        <FiClock className="w-3.5 h-3.5" />
+                        Expected
+                      </span>
+                    </th>
+                    <th className="px-4 py-3.5 text-left font-semibold whitespace-nowrap w-20">
+                      <span className="flex items-center gap-1.5">
+                        <FiUser className="w-3.5 h-3.5" />
+                        By
+                      </span>
+                    </th>
+                    <th className="px-4 py-3.5 text-center font-semibold whitespace-nowrap w-24">
+                      Status
+                    </th>
+                    <th className="px-4 py-3.5 text-center font-semibold whitespace-nowrap w-24">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody className={`divide-y ${darkMode ? 'divide-gray-600 bg-gray-800' : 'divide-gray-200 bg-white'}`}>
+                <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
                   {poLoading ? (
                     <tr>
-                      <td colSpan="9" className="px-4 py-8 text-center">
-                        <FiRefreshCw className="w-6 h-6 animate-spin text-indigo-500 mx-auto mb-2" />
-                        <span className="text-gray-500">Loading purchase orders...</span>
+                      <td colSpan="9" className="px-4 py-12 text-center">
+                        <FiRefreshCw className="w-8 h-8 animate-spin text-indigo-500 mx-auto mb-3" />
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading purchase orders...</span>
                       </td>
                     </tr>
-                  ) : filteredOrders.map((order) => (
-                    <tr key={order.poId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-indigo-600 dark:text-indigo-400">PO-{order.poId}</td>
-                      <td className="px-4 py-3 dark:text-gray-300">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-xs">
-                            {(order.supplierName || 'S').charAt(0)}
+                  ) : filteredOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan="9" className="px-4 py-12 text-center">
+                        <FiPackage className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                        <p className={`font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No purchase orders found</p>
+                        <p className={`text-sm mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Try adjusting your search or filter</p>
+                      </td>
+                    </tr>
+                  ) : filteredOrders.map((order, index) => (
+                    <tr 
+                      key={order.poId} 
+                      className={`group transition-all duration-150 ${
+                        darkMode 
+                          ? 'hover:bg-gray-700/50' 
+                          : index % 2 === 0 ? 'bg-white hover:bg-indigo-50/50' : 'bg-gray-50/50 hover:bg-indigo-50/50'
+                      }`}
+                    >
+                      <td className="px-4 py-3.5">
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">
+                          PO-{order.poId}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                            {(order.supplierName || 'S').charAt(0).toUpperCase()}
                           </div>
-                          <div>
-                            <div className="font-medium">{order.supplierName || 'Unknown'}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">ID: {order.supplierId}</div>
+                          <div className="min-w-0">
+                            <div className={`font-medium text-sm truncate max-w-[140px] ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                              {order.supplierName || 'Unknown'}
+                            </div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500">ID: {order.supplierId}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 dark:text-gray-300">{order.items?.length || 0}</td>
-                      <td className="px-4 py-3 font-medium dark:text-white">Rs.{(order.totalAmount || 0).toLocaleString()}</td>
-                      <td className="px-4 py-3 dark:text-gray-300">{formatDate(order.orderDate)}</td>
-                      <td className="px-4 py-3 dark:text-gray-300">{order.expectedDate ? formatDate(order.expectedDate) : '-'}</td>
-                      <td className="px-4 py-3 dark:text-gray-300">
-                        <span className="flex items-center gap-1">
-                          <FiUser className="w-4 h-4" />
-                          {order.createdBy || 'System'}
+                      <td className="px-3 py-3.5 text-center">
+                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
+                          darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {order.items?.length || 0}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                      <td className="px-4 py-3.5 text-right">
+                        <span className={`font-bold text-sm ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                          Rs.{(order.totalAmount || 0).toLocaleString()}
+                        </span>
+                      </td>
+                      <td className={`px-4 py-3.5 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {formatDate(order.orderDate)}
+                      </td>
+                      <td className={`px-4 py-3.5 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {order.expectedDate ? formatDate(order.expectedDate) : (
+                          <span className="text-gray-300 dark:text-gray-600">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                            darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            <FiUser className="w-3 h-3" />
+                          </div>
+                          <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            {order.createdBy || 'Sys'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-center">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${getStatusColor(order.status)}`}>
                           {getStatusIcon(order.status)}
                           {purchaseOrderService.getStatusLabel(order.status)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center justify-center gap-1">
                           <button 
                             onClick={() => handleViewPO(order.poId)}
-                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                            className={`p-2 rounded-lg transition-all duration-150 ${
+                              darkMode 
+                                ? 'hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300' 
+                                : 'hover:bg-indigo-50 text-indigo-500 hover:text-indigo-600'
+                            }`}
                             title="View Details"
                           >
                             <FiEye className="w-4 h-4" />
                           </button>
-                          <button className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300" title="Edit">
+                          <button 
+                            className={`p-2 rounded-lg transition-all duration-150 ${
+                              darkMode 
+                                ? 'hover:bg-amber-500/20 text-amber-400 hover:text-amber-300' 
+                                : 'hover:bg-amber-50 text-amber-500 hover:text-amber-600'
+                            }`}
+                            title="Edit"
+                          >
                             <FiEdit2 className="w-4 h-4" />
                           </button>
-                          <button className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300" title="Delete">
+                          <button 
+                            className={`p-2 rounded-lg transition-all duration-150 ${
+                              darkMode 
+                                ? 'hover:bg-red-500/20 text-red-400 hover:text-red-300' 
+                                : 'hover:bg-red-50 text-red-500 hover:text-red-600'
+                            }`}
+                            title="Delete"
+                          >
                             <FiTrash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -784,15 +884,25 @@ const PurchaseOrder = () => {
                 </tbody>
               </table>
             </div>
-            {filteredOrders.length === 0 && (
-              <div className="p-8 text-center">
-                <FiPackage className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">No purchase orders found</p>
+            
+            {/* Table Footer with count */}
+            {!poLoading && filteredOrders.length > 0 && (
+              <div className={`px-4 py-3 border-t ${darkMode ? 'border-gray-700 bg-gray-700/30' : 'border-gray-100 bg-gray-50/50'}`}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Showing <span className="font-semibold">{filteredOrders.length}</span> of <span className="font-semibold">{purchaseOrders.length}</span> orders
+                  </span>
+                  <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Total Value: <span className={`font-bold ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                      Rs.{filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
         </div>
-      )}
+      )}   {/* order ended */}
 
       {/* How It Works Tab */}
       {activeTab === 'how-it-works' && (
