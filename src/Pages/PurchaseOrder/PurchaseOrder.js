@@ -899,7 +899,7 @@ const PurchaseOrder = () => {
   ];
 
   return (
-    <div className={`flex flex-col p-4 md:p-6 rounded-xl shadow-md min-h-screen ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
+    <div className={`flex flex-col p-4 md:p-6 rounded-xl shadow-md h-screen overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
       
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
