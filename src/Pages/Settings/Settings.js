@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getInvoiceDetails, updateInvoiceDetails, getInvoiceImage } from '../../actions/POS/invoiceActions';
 import { useAuthenticatedImage } from '../../hooks/useAuthenticatedImage';
 import PromotionsSettings from './PromotionsSettings';
+import LoyaltySettings from './LoyaltySettings';
 
 const SettingsPage = () => {
   const { darkMode } = useSelector(state => state.ui);
@@ -436,6 +437,16 @@ const SettingsPage = () => {
             <i className="fas fa-tag mr-2"></i>
             Promotions
           </button>
+          <button
+            onClick={() => setActiveTab('loyalty')}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${activeTab === 'loyalty'
+                ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+          >
+            <i className="fas fa-gift mr-2"></i>
+            Loyalty
+          </button>
         </div>
 
         {saveStatus === 'success' && (
@@ -723,6 +734,11 @@ const SettingsPage = () => {
         {/* Promotions Settings Tab */}
         {activeTab === 'promotions' && (
           <PromotionsSettings darkMode={darkMode} />
+        )}
+
+        {/* Loyalty Settings Tab */}
+        {activeTab === 'loyalty' && (
+          <LoyaltySettings darkMode={darkMode} />
         )}
 
         <div className="mt-6 text-center text-sm text-gray-500">
