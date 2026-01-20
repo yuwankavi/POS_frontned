@@ -165,6 +165,7 @@ import Barcode from "../../Pages/inventory/BarcodeGenerator";
 import Dashboard from "../../Pages/inventory/dashboard";
 import Unit from "../../Pages/inventory/Product/Unit";
 import Invoice_Return from "../../Pages/Invoice_return/InvoiceReturn";
+import PurchaseOrder from "../../Pages/PurchaseOrder/PurchaseOrder";
 
 const Layout = () => {
   const { user } = useSelector((state) => state.auth);
@@ -221,6 +222,7 @@ const Layout = () => {
           {activePage === "USER_ACCESS" && <UserAccessPage />}
           {activePage === "ADD_PRODUCT" && <AddProduct />}
           {activePage === "SUPPLIER" && <Supplier />}
+          {activePage === "PURCHASE_ORDER" && <PurchaseOrder />}
           {activePage === "CUSTOMER" && <Customer />}
           {activePage === "HISTORY" && <History />}
           {activePage === "RETURNS" && <Return />}

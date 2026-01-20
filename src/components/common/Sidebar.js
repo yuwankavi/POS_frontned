@@ -40,7 +40,7 @@ const Sidebar = ({ setActivePage }) => {
     dispatch(openModal(modalType));
   };
   const handleButtonClick = (button, event) => {
-    if (['POS', 'USER_ACCESS', 'SUPPLIER', 'CUSTOMER','HISTORY','ADD_PRODUCT','PRINT_INVOICE','RETURNS','SETTINGS','HELP','INVOICE_RETURN'].includes(button.id)) {
+    if (['POS', 'USER_ACCESS', 'SUPPLIER', 'PURCHASE_ORDER', 'CUSTOMER','HISTORY','ADD_PRODUCT','PRINT_INVOICE','RETURNS','SETTINGS','HELP','INVOICE_RETURN'].includes(button.id)) {
       setActivePage(button.id);
       setShowSubMenu(false);
       setShowChildMenu(false);
@@ -181,6 +181,7 @@ const Sidebar = ({ setActivePage }) => {
       ]  
     },
     { id: 'SUPPLIER', icon: 'fas fa-truck', label: 'Supplier', color: 'bg-amber-500 hover:bg-amber-600' },
+    { id: 'PURCHASE_ORDER', icon: 'fas fa-shopping-cart', label: 'Purchase Order', color: 'bg-indigo-600 hover:bg-indigo-700' },
     { id: 'CUSTOMER', icon: 'fas fa-users', label: 'Customer Management', color: 'bg-yellow-600 hover:bg-yellow-700' }, 
     { 
       id: 'REPORTS', 
