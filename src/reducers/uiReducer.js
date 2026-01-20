@@ -1,10 +1,12 @@
-import { TOGGLE_THEME, OPEN_MODAL, CLOSE_MODAL } from '../constants/actionTypes';
+import { TOGGLE_THEME, OPEN_MODAL, CLOSE_MODAL, SET_ACTIVE_PAGE, SET_PO_PREFILL_DATA, CLEAR_PO_PREFILL_DATA } from '../constants/actionTypes';
 const initialState = {
   darkMode: localStorage.getItem('darkMode') === 'true' ? true : false,
   // darkMode: false,
   activeModal: null,
   modalProps: null,
-  sidebarCollapsed: false
+  sidebarCollapsed: false,
+  activePage: 'POS',
+  poPrefillData: null
 };
 export const uiReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -26,6 +28,21 @@ export const uiReducer = (state = initialState, action) => {
         ...state,
         activeModal: null,
         modalProps: null
+      };
+    case SET_ACTIVE_PAGE:
+      return {
+        ...state,
+        activePage: action.payload
+      };
+    case SET_PO_PREFILL_DATA:
+      return {
+        ...state,
+        poPrefillData: action.payload
+      };
+    case CLEAR_PO_PREFILL_DATA:
+      return {
+        ...state,
+        poPrefillData: null
       };
     default:
       return state;

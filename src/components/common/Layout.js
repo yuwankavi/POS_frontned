@@ -170,8 +170,16 @@ import PurchaseOrder from "../../Pages/PurchaseOrder/PurchaseOrder";
 const Layout = () => {
   const { user } = useSelector((state) => state.auth);
   const { tabs } = useSelector((state) => state.cart);
+  const { activePage: reduxActivePage } = useSelector((state) => state.ui);
   const [activePage, setActivePage] = useState("POS");
   const [cartHidden, setCartHidden] = useState(false);
+  
+  // Sync with Redux activePage when it changes (for navigation from other pages like ROA)
+  useEffect(() => {
+    if (reduxActivePage && reduxActivePage !== activePage) {
+      setActivePage(reduxActivePage);
+    }
+  }, [reduxActivePage]);
   
   // Determine default page based on user type
   useEffect(() => {

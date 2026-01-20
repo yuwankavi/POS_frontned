@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import reorderAlertService from '../../../services/Inventory/reorderAlertService';
+import purchaseOrderService from '../../../services/purchaseOrderService';
+import { setActivePage, setPoPrefillData } from '../../../actions/uiActions';
 import {
   FiPackage,
   FiSearch,
   FiAlertTriangle,
-  FiHome
+  FiHome,
+  FiRefreshCw
 } from 'react-icons/fi';
 import Breadcrumb from '../../../components/common/Breadcrumb.js';
 
 const ROA = () => {
   const { darkMode } = useSelector((state) => state.ui || {});
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [reorderingProduct, setReorderingProduct] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -35,6 +40,49 @@ const ROA = () => {
   useEffect(() => {
     load();
   }, []);
+
+  // Handle Reorder button click
+  const handleReorder = async (product) => {
+    try {
+      setReorderingProduct(product.PPROCODE);
+      
+      // Fetch batch details to get supplier info
+      const batchData = await purchaseOrderService.getBatchDetails();
+      const batches = batchData.ResultSet || [];
+      
+      // Find the batch for this product
+      const productBatch = batches.find(b => b.PB_ProCode === product.PPROCODE?.toString());
+      
+      if (productBatch) {
+        // Set prefill data in Redux and navigate to Purchase Order page
+        dispatch(setPoPrefillData({
+          productCode: productBatch.PB_ProCode,
+          productName: productBatch.PB_ProDes,
+          supplierId: productBatch.PB_SupCode,
+          supplierName: productBatch.PB_SupName,
+          purchasePrice: parseFloat(productBatch.PB_PPrice) || 0,
+          sellPrice: parseFloat(productBatch.PB_SPrice) || 0,
+          balanceQty: parseFloat(productBatch.PB_BLQty) || 0,
+          warehouseCode: productBatch.PB_WHCode,
+          warehouseName: productBatch.PB_WHName,
+        }));
+        dispatch(setActivePage('PURCHASE_ORDER'));
+      } else {
+        // Navigate without supplier info if batch not found
+        dispatch(setPoPrefillData({
+          productCode: product.PPROCODE,
+          productName: product.PPDES,
+          balanceQty: parseFloat(product.PBALQTY) || 0,
+        }));
+        dispatch(setActivePage('PURCHASE_ORDER'));
+      }
+    } catch (err) {
+      console.error('Error fetching batch details:', err);
+      alert('Failed to load product details. Please try again.');
+    } finally {
+      setReorderingProduct(null);
+    }
+  };
 
   // Filter by search term using new field names
   const filtered = data.filter((it) => {
@@ -166,9 +214,18 @@ const ROA = () => {
                           <td className="px-4 py-2 text-right">{parseInt(balanceQty)}</td>
                           <td className="px-4 py-2 text-right">
                             {needsReorder ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                <FiAlertTriangle className="w-3 h-3" /> Reorder
-                              </span>
+                              <button 
+                                onClick={() => handleReorder(it)}
+                                disabled={reorderingProduct === it.PPROCODE}
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer"
+                              >
+                                {reorderingProduct === it.PPROCODE ? (
+                                  <FiRefreshCw className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <FiAlertTriangle className="w-3 h-3" />
+                                )}
+                                Reorder
+                              </button>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">OK</span>
                             )}

@@ -1,0 +1,24 @@
+// Purchase Order Constants
+export const PO_LIST_REQUEST = 'PO_LIST_REQUEST';
+export const PO_LIST_SUCCESS = 'PO_LIST_SUCCESS';
+export const PO_LIST_FAIL = 'PO_LIST_FAIL';
+
+export const PO_BY_ID_REQUEST = 'PO_BY_ID_REQUEST';
+export const PO_BY_ID_SUCCESS = 'PO_BY_ID_SUCCESS';
+export const PO_BY_ID_FAIL = 'PO_BY_ID_FAIL';
+
+export const PO_BY_SUPPLIER_REQUEST = 'PO_BY_SUPPLIER_REQUEST';
+export const PO_BY_SUPPLIER_SUCCESS = 'PO_BY_SUPPLIER_SUCCESS';
+export const PO_BY_SUPPLIER_FAIL = 'PO_BY_SUPPLIER_FAIL';
+
+export const PO_CREATE_REQUEST = 'PO_CREATE_REQUEST';
+export const PO_CREATE_SUCCESS = 'PO_CREATE_SUCCESS';
+export const PO_CREATE_FAIL = 'PO_CREATE_FAIL';
+export const PO_CREATE_RESET = 'PO_CREATE_RESET';
+
+export const PO_UPDATE_REQUEST = 'PO_UPDATE_REQUEST';
+export const PO_UPDATE_SUCCESS = 'PO_UPDATE_SUCCESS';
+export const PO_UPDATE_FAIL = 'PO_UPDATE_FAIL';
+export const PO_UPDATE_RESET = 'PO_UPDATE_RESET';
+
+export const PO_CLEAR_SELECTED = 'PO_CLEAR_SELECTED';

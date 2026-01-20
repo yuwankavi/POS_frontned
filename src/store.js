@@ -76,6 +76,14 @@ import {
 } from './reducers/Inventory/commonDropdownReducer.js';
 // Import promotion reducer
 import { promotionReducer } from './reducers/POS/promotionReducer.js';
+// Import purchase order reducers
+import { 
+  poListReducer, 
+  poDetailsReducer, 
+  poBySupplierReducer, 
+  poCreateReducer, 
+  poUpdateReducer 
+} from './reducers/purchaseOrderReducer.js';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -140,7 +148,13 @@ const rootReducer = combineReducers({
   warehouseList: warehouseListReducer,
   productList: productListReducer,
   batchList: batchListReducer,
-  promotion: promotionReducer
+  promotion: promotionReducer,
+  // Purchase Order reducers
+  poList: poListReducer,
+  poDetails: poDetailsReducer,
+  poBySupplier: poBySupplierReducer,
+  poCreate: poCreateReducer,
+  poUpdate: poUpdateReducer,
 });
 
 const middleware = [thunk];
