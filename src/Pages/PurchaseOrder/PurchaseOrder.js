@@ -867,16 +867,7 @@ const PurchaseOrder = () => {
                           >
                             <FiEdit2 className="w-4 h-4" />
                           </button>
-                          <button 
-                            className={`p-2 rounded-lg transition-all duration-150 ${
-                              darkMode 
-                                ? 'hover:bg-red-500/20 text-red-400 hover:text-red-300' 
-                                : 'hover:bg-red-50 text-red-500 hover:text-red-600'
-                            }`}
-                            title="Delete"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
+                          {/* Delete button removed */}
                         </div>
                       </td>
                     </tr>
