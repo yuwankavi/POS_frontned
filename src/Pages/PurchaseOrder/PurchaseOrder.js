@@ -1213,6 +1213,7 @@ const PurchaseOrder = () => {
                   {/* Add Item Form */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
                     <div className="relative">
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Product</label>
                       <input
                         type="text"
                         placeholder="Search products..."
@@ -1226,8 +1227,8 @@ const PurchaseOrder = () => {
                         }}
                         onFocus={() => setShowProductDropdown(true)}
                         className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode
-                            ? 'bg-gray-700 border-gray-600 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300'
+                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                           } focus:ring-2 focus:ring-indigo-500`}
                       />
                       {showProductDropdown && productSearchTerm && (
@@ -1253,37 +1254,45 @@ const PurchaseOrder = () => {
                         </div>
                       )}
                     </div>
-                    <input
-                      type="number"
-                      placeholder="Quantity"
-                      min="1"
-                      value={newItem.quantity}
-                      onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })}
-                      className={`px-3 py-2 rounded-lg border text-sm ${darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-900'
-                        } focus:ring-2 focus:ring-indigo-500`}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      min="0"
-                      step="0.01"
-                      value={newItem.price}
-                      onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
-                      className={`px-3 py-2 rounded-lg border text-sm ${darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-900'
-                        } focus:ring-2 focus:ring-indigo-500`}
-                    />
-                    <button
-                      type="button"
-                      onClick={addItemToOrder}
-                      className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2"
-                    >
-                      <FiPlus className="w-4 h-4" />
-                      Add Item
-                    </button>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Quantity</label>
+                      <input
+                        type="number"
+                        placeholder="Quantity"
+                        min="1"
+                        value={newItem.quantity}
+                        onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })}
+                        className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300'
+                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                          } focus:ring-2 focus:ring-indigo-500`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Price</label>
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        min="0"
+                        step="0.01"
+                        value={newItem.price}
+                        onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
+                        className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300'
+                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                          } focus:ring-2 focus:ring-indigo-500`}
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={addItemToOrder}
+                        className="w-full px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+                      >
+                        <FiPlus className="w-4 h-4" />
+                        Add Item
+                      </button>
+                    </div>
                   </div>
 
                   {/* Order Details */}
@@ -1317,7 +1326,7 @@ const PurchaseOrder = () => {
                         required
                       />
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <label className="block text-sm font-medium dark:text-white">
                         Payment Terms
                       </label>
@@ -1334,7 +1343,7 @@ const PurchaseOrder = () => {
                         <option>Net 45</option>
                         <option>Due on Receipt</option>
                       </select>
-                    </div>
+                    </div> */}
                     <div className="space-y-2">
                       <label className="block text-sm font-medium dark:text-white">
                         Shipping Address
