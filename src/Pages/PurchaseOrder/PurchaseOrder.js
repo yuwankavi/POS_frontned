@@ -34,7 +34,7 @@ import {
   FiTag
 } from 'react-icons/fi';
 import { listSupplier } from '../../actions/supplierAction';
-import { listAllPurchaseOrders, getPurchaseOrderById, createPurchaseOrder } from '../../actions/purchaseOrderActions';
+import { listAllPurchaseOrders, getPurchaseOrderById, createPurchaseOrder, updatePurchaseOrderStatus } from '../../actions/purchaseOrderActions';
 import { fetchProducts } from '../../actions/POS/productAction';
 import { clearPoPrefillData } from '../../actions/uiActions';
 import purchaseOrderService from '../../services/purchaseOrderService';
@@ -59,6 +59,8 @@ const PurchaseOrder = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isNewPOModalOpen, setIsNewPOModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [statusMenuOpen, setStatusMenuOpen] = useState(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
@@ -244,6 +246,25 @@ const PurchaseOrder = () => {
   const handleViewPO = (poId) => {
     dispatch(getPurchaseOrderById(poId));
     setIsViewModalOpen(true);
+  };
+
+  // Toggle status menu for a PO row
+  const toggleStatusMenu = (poId) => {
+    setStatusMenuOpen((prev) => (prev === poId ? null : poId));
+  };
+
+  // Change PO status and call backend
+  const handleChangePOStatus = async (poId, status) => {
+    try {
+      setUpdatingStatusId(poId);
+      await dispatch(updatePurchaseOrderStatus(poId, status));
+      setStatusMenuOpen(null);
+    } catch (error) {
+      console.error('Failed to update PO status', error);
+      alert(error?.message || 'Failed to update PO status');
+    } finally {
+      setUpdatingStatusId(null);
+    }
   };
 
   // Handle refresh
@@ -857,16 +878,47 @@ const PurchaseOrder = () => {
                           >
                             <FiEye className="w-4 h-4" />
                           </button>
-                          <button 
-                            className={`p-2 rounded-lg transition-all duration-150 ${
-                              darkMode 
-                                ? 'hover:bg-amber-500/20 text-amber-400 hover:text-amber-300' 
-                                : 'hover:bg-amber-50 text-amber-500 hover:text-amber-600'
-                            }`}
-                            title="Edit"
-                          >
-                            <FiEdit2 className="w-4 h-4" />
-                          </button>
+                          <div className="relative">
+                            <button 
+                              onClick={() => toggleStatusMenu(order.poId)}
+                              className={`p-2 rounded-lg transition-all duration-150 ${
+                                darkMode 
+                                  ? 'hover:bg-amber-500/20 text-amber-400 hover:text-amber-300' 
+                                  : 'hover:bg-amber-50 text-amber-500 hover:text-amber-600'
+                              }`}
+                              title="Change Status"
+                            >
+                              <FiEdit2 className="w-4 h-4" />
+                            </button>
+
+                            {statusMenuOpen === order.poId && (
+                              <div className={`absolute right-0 mt-2 w-36 rounded-md shadow-lg z-50 ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                                <div className="p-2">
+                                  <button
+                                    disabled={updatingStatusId === order.poId}
+                                    onClick={() => handleChangePOStatus(order.poId, 'R')}
+                                    className={`w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${updatingStatusId === order.poId ? 'opacity-60' : ''}`}
+                                  >
+                                    <span className="text-green-600 dark:text-green-400">Received</span>
+                                  </button>
+                                  <button
+                                    disabled={updatingStatusId === order.poId}
+                                    onClick={() => handleChangePOStatus(order.poId, 'P')}
+                                    className={`w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${updatingStatusId === order.poId ? 'opacity-60' : ''}`}
+                                  >
+                                    <span className="text-yellow-600 dark:text-yellow-400">Pending</span>
+                                  </button>
+                                  <button
+                                    disabled={updatingStatusId === order.poId}
+                                    onClick={() => handleChangePOStatus(order.poId, 'C')}
+                                    className={`w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${updatingStatusId === order.poId ? 'opacity-60' : ''}`}
+                                  >
+                                    <span className="text-red-600 dark:text-red-400">Cancelled</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                           {/* Delete button removed */}
                         </div>
                       </td>
